@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="UI/UI.csproj" />
+  <Project Path="DATA/DATA.csproj" Id="79ccc883-b58a-42f3-a818-19a9765615d1" />
+  <Project Path="LOGIC/LOGIC.csproj" Id="1c10934c-5295-4163-876e-8feec61dac1e" />
+  <Project Path="UI/UI.csproj" Id="62ec9a29-c5d0-43ed-aabe-d478049dffe6" />
 </Solution>
