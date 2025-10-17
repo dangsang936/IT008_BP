@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -53,12 +56,17 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="TestAudioManagerForm.cs" />
+    <Compile Include="TestAudioManagerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="TestAudioManagerForm.Designer.cs">
       <DependentUpon>TestAudioManagerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -103,6 +111,26 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\Big O.png" />
+    <Resource Include="Assets\Blue.png" />
+    <Resource Include="Assets\Green.png" />
+    <Resource Include="Assets\High O.png" />
+    <Resource Include="Assets\I.png" />
+    <Resource Include="Assets\icon.ico" />
+    <Resource Include="Assets\J.png" />
+    <Resource Include="Assets\L.png" />
+    <Resource Include="Assets\LightBlue.png" />
+    <Resource Include="Assets\Long J.png" />
+    <Resource Include="Assets\Long L.png" />
+    <Resource Include="Assets\O.png" />
+    <Resource Include="Assets\Orange.png" />
+    <Resource Include="Assets\Purple.png" />
+    <Resource Include="Assets\Red.png" />
+    <Resource Include="Assets\S.png" />
+    <Resource Include="Assets\T.png" />
+    <Resource Include="Assets\Yellow.png" />
+    <Resource Include="Assets\Z.png" />
+    <Content Include="icon.ico" />
     <Content Include="SOUNDS\BGM\BGM.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

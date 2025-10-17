@@ -16,5 +16,11 @@ namespace UI
         {
             InitializeComponent();
         }
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Sang an cut");
+            Application.Exit();
+
+        }
     }
 }
