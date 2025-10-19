@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Board
+namespace LOGIC
 {
     public class MainBord
     {
@@ -16,6 +16,7 @@ namespace Board
             for (int i = 0; i < 8; i++)
                 for (int j = 0; j < 8; j++)
                     Board[i, j] = false;
-        }
+        }       
+        
     }
 }

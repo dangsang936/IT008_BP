@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Block
+namespace LOGIC
 {
     public class Block
     {
         public bool[,] grid;
         public int height;
         public int width;
+        public int x, y;
         string Type_name;
         public void Create_Block(string name)
         {
@@ -139,6 +140,15 @@ namespace Block
                 
             }
         }
-
+        // hàm kiểm tra xem block có thể đặt vào vị trí (r,c) của bảng board không
+        public bool Can_Place (bool[,] board, int r, int c ) 
+        {
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                    if (grid[i, j] && board[i + r, j + c])
+                        return false;
+            return true;
+        }
+        
     }
 }
