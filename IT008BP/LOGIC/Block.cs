@@ -11,7 +11,6 @@ namespace LOGIC
         public bool[,] grid;
         public int height;
         public int width;
-        public int x, y;
         string Type_name;
         public void Create_Block(string name)
         {
@@ -52,6 +51,7 @@ namespace LOGIC
                     height = 3;
                     width = 3;
                     grid = new bool[3, 3] { { true, false, false }, { true, false, false }, { true, true, true } };
+                    break;
                 case "Long J Type":
                     height = 3;
                     width = 3;
@@ -140,12 +140,12 @@ namespace LOGIC
                 
             }
         }
-        // hàm kiểm tra xem block có thể đặt vào vị trí (r,c) của bảng board không
-        public bool Can_Place (bool[,] board, int r, int c ) 
+        // hàm kiểm tra xem block có thể đặt vào vị trí (x,y) của bảng board không
+        public bool Can_Place (ref MainBord board ,int x, int y ) 
         {
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
-                    if (grid[i, j] && board[i + r, j + c])
+                    if (grid[i, j] && board.Board[i + x, j + y])
                         return false;
             return true;
         }
