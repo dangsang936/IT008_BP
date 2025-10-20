@@ -18,13 +18,8 @@ namespace UI
         }
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Sang an cut");
+            MessageBox.Show("Son an cut");
             Application.Exit();
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
 
         }
     }
