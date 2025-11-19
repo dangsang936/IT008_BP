@@ -11,7 +11,7 @@ namespace LOGIC
     public class MainBord
     {
         public bool[,] Board { get; set; }
-
+        
         public MainBord()
         {
             Board = new bool[8, 8];
@@ -78,6 +78,8 @@ namespace LOGIC
                         .Select(x => cols[x.index])
                         .ToArray();
         }
+
+        //hàm clear nhiều cột
         public void clear_cols(int[] cols)
         {
             if (cols.Length == 0) return;
