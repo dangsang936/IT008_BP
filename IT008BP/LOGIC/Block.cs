@@ -18,7 +18,7 @@ namespace LOGIC
             switch (Type_name)
             {
                 case "3 Verticle Line Block":
-                    int height = 3;
+                    height = 3;
                     width = 1;
                     grid = new bool[3, 1] { { true }, { true }, { true } };
                     break;
@@ -137,12 +137,17 @@ namespace LOGIC
                     width = 3;
                     grid = new bool[2, 3] { { false, false, true }, { true, true, true } };
                     break;
-                
+
             }
         }
-        // hàm kiểm tra xem block có thể đặt vào vị trí (x,y) của bảng board không
-        public bool Can_Place (ref MainBord board ,int x, int y ) 
+        public bool Can_Place(MainBord board, int x, int y)
         {
+            if (board == null || board.Board == null) return false;
+            int rows = board.Board.GetLength(0);
+            int cols = board.Board.GetLength(1);
+
+            if (x < 0 || y < 0 || x + height > rows || y + width > cols) return false;
+
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
                     if (grid[i, j] && board.Board[i + x, j + y])

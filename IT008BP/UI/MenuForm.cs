@@ -13,24 +13,24 @@ namespace UI
         {
             InitializeComponent();
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.BackColor = Color.FromArgb(25, 25, 35);
+            this.BackColor = Color.FromArgb(23, 86, 191);
             this.ClientSize = new Size(800, 600);
             this.DoubleBuffered = true;
+            this.BackgroundImage = Properties.Resources.bg;
+            this.BackgroundImageLayout = ImageLayout.Stretch;
 
-            Label lblTitle = new Label
-            {
-                Text = "BLOCK BLAST",
-                Font = new Font("Impact", 36, FontStyle.Bold),
-                ForeColor = Color.DeepSkyBlue,
-                AutoSize = true,
-                Location = new Point((this.ClientSize.Width / 2) - 200, 80)
-            };
-            this.Controls.Add(lblTitle);
+            PictureBox logo = new PictureBox();
+            logo.Image = Properties.Resources.logo;
+            logo.SizeMode = PictureBoxSizeMode.Zoom;
+            logo.Size = new Size(648, 216);
+            logo.Cursor = Cursors.Hand;
+            logo.BackColor = Color.Transparent;
+            this.Controls.Add(logo);
 
             PictureBox btnPlay = new PictureBox();
             btnPlay.Image = Properties.Resources.play;
             btnPlay.SizeMode = PictureBoxSizeMode.Zoom;
-            btnPlay.Size = new Size(200, 80);
+            btnPlay.Size = new Size(320, 128);
             btnPlay.Cursor = Cursors.Hand;
             btnPlay.BackColor = Color.Transparent;
             btnPlay.Click += BtnPlay_Click;
@@ -40,7 +40,7 @@ namespace UI
             btnSetting.Image = Properties.Resources.setting;
             btnSetting.SizeMode = PictureBoxSizeMode.Zoom;
             btnSetting.Cursor = Cursors.Hand;
-            btnSetting.Size = new Size(200, 80);
+            btnSetting.Size = new Size(320, 128); 
             btnSetting.BackColor = Color.Transparent;
             this.Controls.Add(btnSetting);
 
@@ -48,22 +48,45 @@ namespace UI
             btnExit.Image = Properties.Resources.quit;
             btnExit.SizeMode = PictureBoxSizeMode.Zoom;
             btnExit.Cursor = Cursors.Hand;
-            btnExit.Size = new Size(200, 80);
+            btnExit.Size = new Size(320, 128); 
             btnExit.BackColor = Color.Transparent;
             btnExit.Click += BtnExit_Click;
             this.Controls.Add(btnExit);
 
-            this.Load += (s, e) =>
+            Action positionControls = () =>
             {
-                lblTitle.Location = new Point(
-                    (this.ClientSize.Width - lblTitle.Width) / 2,
-                    80
-                );
-                int centerX = (this.ClientSize.Width - btnPlay.Width) / 2;
-                btnPlay.Location = new Point(centerX, 220);
-                btnSetting.Location = new Point(centerX, 320);
-                btnExit.Location = new Point(centerX, 420);
+                int logoWidth = (int)(this.ClientSize.Width * 0.6);
+                logoWidth = Math.Max(240, Math.Min(logoWidth, 720));
+                int logoHeight = logoWidth / 3;
+                logo.Size = new Size(logoWidth, logoHeight);
+
+                int btnWidth = (int)(this.ClientSize.Width * 0.4); 
+                btnWidth = Math.Max(240, Math.Min(btnWidth, 420)); 
+                int btnHeight = (int)(btnWidth * 0.4); 
+                btnPlay.Size = new Size(btnWidth, btnHeight);
+                btnSetting.Size = new Size(btnWidth, btnHeight);
+                btnExit.Size = new Size(btnWidth, btnHeight);
+
+                int centerXButtons = (this.ClientSize.Width - btnWidth) / 2;
+
+
+                int spacing = Math.Max(6, btnHeight / 12);
+                int totalButtonsHeight = 3 * btnHeight + 2 * spacing;
+                int minTopBelowLogo = logo.Bounds.Bottom + 20;
+                int startY = Math.Max(minTopBelowLogo, (this.ClientSize.Height - totalButtonsHeight) / 2);
+
+                btnPlay.Location = new Point(centerXButtons, startY);
+                btnSetting.Location = new Point(centerXButtons, startY + btnHeight + spacing);
+                btnExit.Location = new Point(centerXButtons, startY + 2 * (btnHeight + spacing));
+
+                int centerXLogo = (this.ClientSize.Width - logo.Width) / 2;
+                int logoY = Math.Max(20, startY - logo.Height - 20);
+                logo.Location = new Point(centerXLogo, logoY);
             };
+
+            this.Load += (s, e) => positionControls();
+            this.Resize += (s, e) => positionControls();
+
             this.Opacity = 0;
             Timer fadeIn = new Timer();
             fadeIn.Interval = 20;
