@@ -140,7 +140,7 @@ namespace LOGIC
 
             }
         }
-        public bool Can_Place(MainBord board, int x, int y)
+        public bool Can_Place(MainBoard board, int x, int y)
         {
             if (board == null || board.Board == null) return false;
             int rows = board.Board.GetLength(0);
