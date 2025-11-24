@@ -16,7 +16,7 @@ namespace UI
         private DoubleBufferedPanel board;
         private DoubleBufferedPanel nextPreview;
         private Label lblScore;
-        private MainBord mainBoard;
+        private MainBoard mainBoard;
 
         private Block currentBlock;
         private Block nextBlock;
@@ -45,7 +45,7 @@ namespace UI
             this.ClientSize = new Size(900, 600);
             this.DoubleBuffered = true;
 
-            mainBoard = new MainBord();
+            mainBoard = new MainBoard();
 
             board = new DoubleBufferedPanel { BackColor = this.BackColor };
             nextPreview = new DoubleBufferedPanel { BackColor = this.BackColor };
@@ -217,7 +217,7 @@ namespace UI
 
         private void ResetBoard()
         {
-            mainBoard = new MainBord();
+            mainBoard = new MainBoard();
             score = 0;
             UpdateScoreLabel();
             TryInitCurrentAndNext();

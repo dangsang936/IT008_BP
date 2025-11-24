@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace LOGIC
 {
-    public class MainBord
+    public class MainBoard
     {
         public bool[,] Board { get; set; }
         
-        public MainBord()
+        public MainBoard()
         {
             Board = new bool[8, 8];
             for (int i = 0; i < 8; i++)
