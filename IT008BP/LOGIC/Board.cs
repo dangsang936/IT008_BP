@@ -29,6 +29,7 @@ namespace LOGIC
             for (int i = 0; i < block.height; i++)
                 for (int j = 0; j < block.width; j++)
                     Board[i + x, j + y] = true;
+            return true;
         }
         // hàm kiểm tra đầy hàng, trả về mảng các hàng đầy, nếu không có hàng nào đầy trả về mảng rỗng
         public int[] Check_full_rows(params int[] rows)
@@ -84,9 +85,9 @@ namespace LOGIC
         }
 
         //hàm clear nhiều cột
-        public void clear_cols(int[] cols)
+        public bool clear_cols(int[] cols)
         {
-            if (cols.Length == 0) return;
+            if (cols.Length == 0) return true;
             foreach (int col in cols)
                 for (int i = 0; i < 8; i++)
                     Board[i,col] = false;
