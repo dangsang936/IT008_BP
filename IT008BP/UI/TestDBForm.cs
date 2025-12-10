@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Forms;
-using DATA;
+using DATA; 
 
 namespace UI
 {
@@ -124,15 +124,15 @@ namespace UI
             {
                 MessageBox.Show("Nhập UserID hợp lệ!");
                 return;
-            }
+        }
 
             try
-            {
+        {
                 var user = helper.GetUserInfo(userId);
                 lblCurrentUser.Text = $"User: {user.Username} | Highscore: {user.Highscore}";
                 lstUserScores.Items.Clear();
                 foreach (var score in user.Scores)
-                {
+            {
                     lstUserScores.Items.Add($"ScoreID: {score.ScoreID} | Score: {score.Score} | Ngày: {score.PlayDate}");
                 }
             }
@@ -140,7 +140,7 @@ namespace UI
             {
                 MessageBox.Show(ex.Message);
             }
-        }
+            }
 
         private void UpdateLeaderboard()
         {
