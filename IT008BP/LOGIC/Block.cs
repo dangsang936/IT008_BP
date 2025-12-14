@@ -12,7 +12,7 @@ namespace LOGIC
         public int X {get; set;}
         public int Y {get; set;}
         public BlockData data { get; set; }
-        Block()
+        public Block()
         {
             //mặc định X,Y có tọa độ -1 tức là block đang ở ngoài, chưa đăt vào bảng
             int X = -1; 

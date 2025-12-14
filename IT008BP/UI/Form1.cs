@@ -1,463 +1,508 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using DATA;
 using LOGIC;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace UI
 {
-    public partial class Form1 : Form
+    public class BufferedPanel : Panel
     {
-        private DoubleBufferedPanel board;
-        private DoubleBufferedPanel nextPreview;
-        private Label lblScore;
-        private MainBoard mainBoard;
-
-        private Block currentBlock;
-        private Block nextBlock;
-        static Random rand = new Random();
-
-        private int currentBlockIndex = 0;
-        private int nextBlockIndex = 0;
-        private int score = 0;
-
-        private readonly string[] blockTypes = new[]
+        public BufferedPanel()
         {
-            "3 Verticle Line Block","4 Verticle Line Block","3 Horizontal Line Block","4 Horizontal Line Block",
-            "L Type","J Type","Long L Type","Long J Type","F Type","7 Type","Long F Type","Long 7 Type",
-            "Z Type","S Type","O Type","Big O Type","4 Type","Reverse 4 Type",
-            "T Type","Reverse T Type","7 Up Type","F Up Type","F Down Type","7 Down Type"
-        };
+            this.DoubleBuffered = true;
+            this.SetStyle(
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.UserPaint |
+                ControlStyles.OptimizedDoubleBuffer,
+                true);
+            this.UpdateStyles();
+        }
 
-        private int hoverRow = -1;
-        private int hoverCol = -1;
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            
+        }
 
-        public Form1()
+        
+
+    }
+
+    public partial class maingame : Form
+    {
+        private BufferedPanel board;
+        private FlowLayoutPanel blockPanel;
+        private PictureBox preview1, preview2, preview3;
+        private Label scorePanel;
+        private int currScore = 0;
+
+        private const int rows = 8;
+        private const int cols = 8;
+
+        private float cellSize => board.ClientSize.Width / (float)cols;
+
+        private List<Point> highlightCells = new List<Point>();
+        bool highlightValid = false;
+
+        private MainBoard gameLogic;
+        private BlockData blockData;
+        private Block draggingBlock = null;
+        private int draggingBlockSourceIndex = -1; 
+
+        private Block block;
+        private BlockData[] previewBlocks = new BlockData[3];
+        private Storage storage = new Storage();
+
+        private Bitmap backBuffer;
+        private Graphics bufferG;
+        public maingame()
         {
             InitializeComponent();
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.BackColor = Color.FromArgb(62, 87, 153);
-            this.ClientSize = new Size(900, 600);
-            this.DoubleBuffered = true;
+            
+            UpdateStyles();
 
-            mainBoard = new MainBoard();
+            gameLogic = new MainBoard();
+            blockData = new BlockData("J");
+            block = new Block();
+            SetupUI();
 
-            board = new DoubleBufferedPanel { BackColor = this.BackColor };
-            nextPreview = new DoubleBufferedPanel { BackColor = this.BackColor };
-            lblScore = new Label
+            
+            try
             {
-                AutoSize = true,
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                Text = "Score: 0"
+                AudioManager.PlayLooping("alterbgm");
+            }
+            catch
+            {
+                
+            }
+
+            
+            this.FormClosed += (s, e) =>
+            {
+                try { AudioManager.Stop("alterbgm"); } catch { }
+            };
+        }
+        private void InitBuffer()
+        {
+            backBuffer?.Dispose();
+            bufferG?.Dispose();
+
+            backBuffer = new Bitmap(board.Width, board.Height);
+            bufferG = Graphics.FromImage(backBuffer);
+
+            bufferG.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+            bufferG.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighSpeed;
+        }
+
+        public void SetupUI()
+        {
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.BackColor = System.Drawing.Color.FromArgb(62, 87, 153);
+            this.ClientSize = new Size(900, 600);
+
+            //===Board===
+            board = new BufferedPanel
+            {
+                Size = new Size(500, 500),
+                Location = new Point(18, 40),
+                BackColor = Color.FromArgb(34, 49, 81)
+            };
+            this.Controls.Add(board);
+
+            board.Paint += PictureBoxBoard_Paint;
+            board.Resize += (s, e) => board.Invalidate();
+            board.MouseMove += board_MouseMove;
+            board.MouseClick += board_MouseClick;
+            board.MouseLeave += (s, e) =>
+            {
+                highlightCells.Clear();
+                board.Invalidate();
             };
 
-            board.Paint += Board_Paint;
-            board.MouseClick += Board_MouseClick;
-            board.MouseMove += Board_MouseMove;
-
-            nextPreview.Paint += NextPreview_Paint;
-
-            this.Controls.Add(board);
-            this.Controls.Add(nextPreview);
-            this.Controls.Add(lblScore);
-
-            if (!HasAnyPlacementForAnyBlock())
+            //===Score Panel===
+            scorePanel = new Label
             {
-                MessageBox.Show(this, "No initial placement available. Board will reset.", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ResetBoard();
-            }
+                Font = new Font("Segoe UI", 20, FontStyle.Bold),
+                Location = new Point(board.Right + 120, board.Top + 120),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Padding = new Padding(10),
+                Text = "Score: 0"
+            };
+            this.Controls.Add(scorePanel);
 
-            TryInitCurrentAndNext();
+            //===Previews===
+            blockPanel = new FlowLayoutPanel
+            {
+                Size = new Size(300, 150),
+                Location = new Point(board.Right + 20, board.Top),
+                FlowDirection = FlowDirection.LeftToRight,
+                WrapContents = false,
+                Padding = new Padding(5),
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                BackColor = Color.FromArgb(45, 63, 104)
+            };
+            this.Controls.Add(blockPanel);
 
-            this.Load += (s, e) => PositionBoard();
-            this.Resize += (s, e) => PositionBoard();
+            preview1 = CreatePreviewBox();
+            preview2 = CreatePreviewBox();
+            preview3 = CreatePreviewBox();
+
+            blockPanel.Controls.Add(preview1);
+            blockPanel.Controls.Add(preview2);
+            blockPanel.Controls.Add(preview3);
+            GeneratePreviewBlocks();
+
+            board.Resize += (s, e) =>
+            {
+                InitBuffer();
+                board.Invalidate();
+            };
+            InitBuffer();
+
         }
 
-        private bool TryInitCurrentAndNext()
+        public void GeneratePreviewBlocks()
         {
-            var cur = FindAnyPlaceableBlock();
-            if (cur == null) return false;
-            currentBlockIndex = cur.Item1;
-            currentBlock = cur.Item2;
+            for (int i = 0; i < 3; i++)
+                previewBlocks[i] = storage.GetRandomBlock(); 
 
-            var nxt = FindAnyPlaceableBlock();
-            if (nxt == null)
-            {
-                nextBlock = null;
-                nextBlockIndex = -1;
-                board?.Invalidate();
-                nextPreview?.Invalidate();
-                return true;
-            }
-
-            nextBlockIndex = nxt.Item1;
-            nextBlock = nxt.Item2;
-
-            board?.Invalidate();
-            nextPreview?.Invalidate();
-            return true;
+            preview1.Invalidate();
+            preview2.Invalidate();
+            preview3.Invalidate();
         }
 
-        private Tuple<int, Block> FindAnyPlaceableBlock()
+        private void board_MouseClick(object sender, MouseEventArgs e)
         {
-            int len = blockTypes.Length;
-            int start = rand.Next(len);
-            for (int i = 0; i < len; i++)
+            if (e.Button == MouseButtons.Left)
             {
-                int idx = (start + i) % len;
-                var b = new Block();
-                b.Create_Block(blockTypes[idx]);
-                if (HasAnyPlacementForBlock(b))
-                    return Tuple.Create(idx, b);
-            }
-            return null;
-        }
+                if (draggingBlock == null) return;
 
-        private void SpawnNextBlockAsCurrent()
-        {
-            if (nextBlock == null)
-            {
-                var any = FindAnyPlaceableBlock();
-                if (any == null)
+                int col = (int)(e.X / cellSize);
+                int row = (int)(e.Y / cellSize);
+
+                draggingBlock.X = col;
+                draggingBlock.Y = row;
+
+                if (gameLogic.Can_Place(draggingBlock))
                 {
-                    var res = MessageBox.Show(this, "No available placements remaining. Restart board?", "Game Over", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                    if (res == DialogResult.Yes)
+                    //===PLACE===
+                    gameLogic.Place(draggingBlock);
+                    UpdateScore(10);
+
+                    //===CLEAR ROW/COL===
+                    int rowsCleared = gameLogic.CheckRowsFull().Count;
+                    int colsCleared = gameLogic.CheckColumnsFull().Count;
+
+                    if (rowsCleared > 0 || colsCleared > 0)
                     {
-                        ResetBoard();
-                        return;
+                        gameLogic.Clear();
+
+                        int totalClear = rowsCleared + colsCleared;
+                        UpdateScore(totalClear * 20);
                     }
-                    else
+
+                    draggingBlock = null;
+                    draggingBlockSourceIndex = -1; 
+                    highlightCells.Clear();
+                    board.Invalidate();
+                    RefreshPreviewSlots();
+                    if (gameOver())
                     {
+
+                        MessageBox.Show("GAME OVER");
+                        MessageBox.Show($"Final Score: {currScore}");
+
+                        AudioManager.Play("gameover");
                         this.Close();
-                        return;
                     }
-                }
-                currentBlockIndex = any.Item1;
-                currentBlock = any.Item2;
-            }
-            else
-            {
-                currentBlockIndex = nextBlockIndex;
-                currentBlock = nextBlock;
-            }
-
-            var nxt = FindAnyPlaceableBlock();
-            if (nxt == null)
-            {
-                var res = MessageBox.Show(this, "Thua cmmr", "Game Over", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                if (res == DialogResult.Yes)
-                {
-                    ResetBoard();
-                    return;
                 }
                 else
                 {
-                    this.Close();
-                    return;
+                    // không đặt được => âm thanh hoặc feedback
+                    System.Media.SystemSounds.Beep.Play();
                 }
             }
-            nextBlockIndex = nxt.Item1;
-            nextBlock = nxt.Item2;
+            else if (e.Button == MouseButtons.Right)
+            {
+                if (draggingBlock != null && draggingBlockSourceIndex != -1)
+                {
+                   
+                    previewBlocks[draggingBlockSourceIndex] = draggingBlock.data;
+                    blockPanel.Controls[draggingBlockSourceIndex].Invalidate();
+                }
+                draggingBlock = null;
+                draggingBlockSourceIndex = -1;
+                highlightCells.Clear();
+                board.Invalidate();
+            }
         }
 
-        private bool HasAnyPlacementForBlock(Block block)
+        private void RefreshPreviewSlots()
         {
-            if (block == null || mainBoard == null || mainBoard.Board == null) return false;
-            int rows = mainBoard.Board.GetLength(0);
-            int cols = mainBoard.Board.GetLength(1);
-
-            if (block.height <= 0 || block.width <= 0) return false;
-            if (block.height > rows || block.width > cols) return false;
-            bool anyOccupied = false;
-            for (int r = 0; r < rows && !anyOccupied; r++)
+            // kiểm tra có còn block nào không
+            bool allEmpty = true;
+            for (int i = 0; i < 3; i++)
             {
-                for (int c = 0; c < cols; c++)
+                if (previewBlocks[i] != null)
                 {
-                    if (mainBoard.Board[r, c])
+                    allEmpty = false;
+                    break;
+                }
+            }
+
+            // nếu không trống hết thì không làm gì
+            if (!allEmpty)
+                return;
+            AudioManager.Play("create"); 
+            // === tạo mới 3 block ===
+            for (int i = 0; i < 3; i++)
+            {
+
+                previewBlocks[i] = storage.GetRandomBlock(); 
+                blockPanel.Controls[i].Invalidate();
+            }
+        }
+
+        public void UpdateScore(int points)
+        {
+            currScore += points;
+            scorePanel.Text = $"Score: {currScore}";
+            if (currScore % 100 == 0 && currScore > 0)
+            {
+                AudioManager.Play("score");
+            }
+        }
+
+        private PictureBox CreatePreviewBox()
+        {
+            var preview = new PictureBox
+            {
+                Size = new Size(90, 90),
+                Margin = new Padding(10),
+                BackColor = Color.FromArgb(78, 109, 179),
+                BorderStyle = BorderStyle.FixedSingle
+            };
+            preview.Paint += Preview_Paint;
+            preview.MouseDown += PreviewMouseDown;
+            return preview;
+        }
+
+        private void Preview_Paint(object sender, PaintEventArgs e)
+        {
+            PictureBox box = sender as PictureBox;
+            int idx = blockPanel.Controls.IndexOf(box);
+
+            if (idx < 0 || idx > 2) return;
+
+            BlockData data = previewBlocks[idx];
+            if (data == null) 
+            {
+                e.Graphics.Clear(box.BackColor);
+                return;
+            }
+
+            var g = e.Graphics;
+            g.Clear(box.BackColor);
+
+                                        
+            int maxDim = Math.Max(data.width, data.height);
+            float drawSize = box.Width * 0.8f;
+            float cell = drawSize / (float)maxDim;
+            float offsetX = (box.Width - data.width * cell) / 2.0f;
+            float offsetY = (box.Height - data.height * cell) / 2.0f;
+
+
+            using (Brush b = new SolidBrush(System.Drawing.Color.LightYellow))
+            using (Pen p = new Pen(System.Drawing.Color.DarkGoldenrod, 2))
+            {
+                for (int i = 0; i < data.height; i++)
+                {
+                    for (int j = 0; j < data.width; j++)
                     {
-                        anyOccupied = true;
-                        break;
+                        if (data.Grid[i, j])
+                        {
+                            float x = j * cell + offsetX;
+                            float y = i * cell + offsetY;
+
+                            g.FillRectangle(b, x, y, cell, cell);
+                            g.DrawRectangle(p, x, y, cell, cell);
+                        }
                     }
                 }
             }
-            if (!anyOccupied)
+        }
+
+        private void PictureBoxBoard_Paint(object sender, PaintEventArgs e)
+        {
+            if (backBuffer == null) return;
+
+            DrawBoardToBuffer();
+            e.Graphics.DrawImageUnscaled(backBuffer, 0, 0);
+        }
+
+
+        // ===HIGHLIGHT===
+
+        public void HighlightBlock(Block blockpreview)
+        {
+            highlightCells.Clear();
+
+            if (blockpreview == null || blockpreview.data == null)
             {
-                return true;
+                highlightValid = false;
+                return;
             }
 
-            for (int r = 0; r <= rows - block.height; r++)
+            highlightValid = gameLogic.Can_Place(blockpreview);
+
+            for (int i = 0; i < blockpreview.data.height; i++)
             {
-                for (int c = 0; c <= cols - block.width; c++)
+                for (int j = 0; j < blockpreview.data.width; j++)
                 {
-                    if (block.Can_Place(mainBoard, r, c))
+                    if (blockpreview.data.Grid[i, j])
+                    {
+                        int boardX = blockpreview.X + j;
+                        int boardY = blockpreview.Y + i;
+
+                        if (boardX >= 0 && boardX < cols &&
+                            boardY >= 0 && boardY < rows)
+                        {
+                            highlightCells.Add(new Point(boardX, boardY));
+                        }
+                    }
+                }
+            }
+
+        }
+        private void DrawBoardToBuffer()
+        {
+            bufferG.Clear(board.BackColor);
+
+            float cw = cellSize;
+            float ch = cellSize;
+
+            using (var pen = new Pen(Color.LightGray, 1))
+            {
+                for (int x = 0; x <= cols; x++)
+                    bufferG.DrawLine(pen, x * cw, 0, x * cw, board.Height);
+
+                for (int y = 0; y <= rows; y++)
+                    bufferG.DrawLine(pen, 0, y * ch, board.Width, y * ch);
+            }
+
+            using (Brush b = new SolidBrush(Color.Goldenrod))
+            {
+                for (int y = 0; y < rows; y++)
+                    for (int x = 0; x < cols; x++)
+                        if (gameLogic.Grid[y, x])
+                            bufferG.FillRectangle(b, x * cw, y * ch, cw, ch);
+            }
+
+            using (Brush b = new SolidBrush(
+                highlightValid ?
+                Color.FromArgb(120, 0, 255, 0) :
+                Color.FromArgb(120, 255, 0, 0)))
+            {
+                foreach (var cell in highlightCells)
+                    bufferG.FillRectangle(b, cell.X * cw, cell.Y * ch, cw, ch);
+            }
+        }
+
+        private void board_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (draggingBlock == null) return;
+
+            int col = (int)(e.X / cellSize);
+            int row = (int)(e.Y / cellSize);
+            if (draggingBlock.X == col && draggingBlock.Y == row)
+                return;
+
+            draggingBlock.X = col;
+            draggingBlock.Y = row;
+
+            HighlightBlock(draggingBlock);
+            board.Invalidate();
+        }
+
+        private BlockData CloneBlockData(BlockData src)
+        {
+            if (src == null) return null;
+
+            BlockData copy = new BlockData(src.Type_name);
+            copy.width = src.width;
+            copy.height = src.height;
+            copy.Rotation_Index = src.Rotation_Index;
+
+            copy.Grid = new bool[src.height, src.width];
+            for (int i = 0; i < src.height; i++)
+                for (int j = 0; j < src.width; j++)
+                    copy.Grid[i, j] = src.Grid[i, j];
+
+            return copy;
+        }
+
+        public bool Can_Place_Anywhere(BlockData data)
+        {
+            Block tmp = new Block();
+            tmp.data = data;
+            for (int y = 0; y < 8; y++)
+            {
+                for (int x = 0; x < 8; x++)
+                {
+                    tmp.X = x;
+                    tmp.Y = y;
+
+                    if (gameLogic.Can_Place(tmp))
                         return true;
                 }
             }
             return false;
         }
 
-        private bool HasAnyPlacementForAnyBlock()
+        private bool gameOver()
         {
-            if (mainBoard == null || mainBoard.Board == null) return false;
-            foreach (var type in blockTypes)
+
+            foreach (var pb in previewBlocks)
             {
-                var b = new Block();
-                b.Create_Block(type);
-                if (HasAnyPlacementForBlock(b))
-                    return true;
+                if (pb == null) continue;
+
+                if (Can_Place_Anywhere(pb))
+                    return false;
             }
-            return false;
+
+            return true;
         }
 
-        private void ResetBoard()
+        private void PreviewMouseDown(object sender, MouseEventArgs e)
         {
-            mainBoard = new MainBoard();
-            score = 0;
-            UpdateScoreLabel();
-            TryInitCurrentAndNext();
-            board?.Invalidate();
-            nextPreview?.Invalidate();
-        }
+            PictureBox box = sender as PictureBox;
+            int idx = blockPanel.Controls.IndexOf(box);
+            if (idx < 0 || idx > 2) return;
+            if (previewBlocks[idx] == null || draggingBlock != null) return;
 
-        private void UpdateScoreLabel()
-        {
-            lblScore.Text = $"Score: {score}";
-        }
-
-        private void PositionBoard()
-        {
-            const int marginHorizontal = 40;
-            const int marginVertical = 40;
-            int availableWidth = Math.Max(0, this.ClientSize.Width - marginHorizontal);
-            int availableHeight = Math.Max(0, this.ClientSize.Height - marginVertical);
-
-            int size = Math.Min(availableWidth - 200, availableHeight);
-            size = Math.Max(240, Math.Min(size, 720));
-
-            board.Size = new Size(size, size);
-            var boardX = (this.ClientSize.Width - board.Width) / 2 - 80;
-            var boardY = (this.ClientSize.Height - board.Height) / 2;
-            board.Location = new Point(boardX, boardY);
-
-            nextPreview.Size = new Size(140, 140);
-            nextPreview.Location = new Point(board.Right + 20, board.Top);
-
-            lblScore.Location = new Point(nextPreview.Left, nextPreview.Bottom + 10);
-
-            board.BringToFront();
-            board.Invalidate();
-            nextPreview.Invalidate();
-        }
-
-        private void Board_Paint(object sender, PaintEventArgs e)
-        {
-            if (mainBoard == null || mainBoard.Board == null) return;
-
-            var g = e.Graphics;
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-            int rows = mainBoard.Board.GetLength(0);
-            int cols = mainBoard.Board.GetLength(1);
-            float cellW = (float)board.ClientSize.Width / cols;
-            float cellH = (float)board.ClientSize.Height / rows;
-
-            using (var occupiedBrush = new SolidBrush(Color.FromArgb(200, 255, 200, 0)))
-            using (var gridPen = new Pen(Color.FromArgb(120, 0, 0, 0)))
+            if (e.Button == MouseButtons.Left)
             {
-                for (int r = 0; r < rows; r++)
-                {
-                    for (int c = 0; c < cols; c++)
-                    {
-                        if (mainBoard.Board[r, c])
-                        {
-                            g.FillRectangle(occupiedBrush, c * cellW, r * cellH, cellW, cellH);
-                        }
-                    }
-                }
+                draggingBlockSourceIndex = idx;
+                var dataCopy = CloneBlockData(previewBlocks[idx]);
 
-                if (currentBlock != null && hoverRow >= 0 && hoverCol >= 0)
-                {
-                    bool fits = (hoverRow + currentBlock.height <= rows) && (hoverCol + currentBlock.width <= cols);
-                    bool canPlace = false;
-                    if (fits) canPlace = currentBlock.Can_Place(mainBoard, hoverRow, hoverCol);
+                draggingBlock = new Block();
+                draggingBlock.data = dataCopy;
+                draggingBlock.X = -1;
+                draggingBlock.Y = -1;
 
-                    Color previewColor = canPlace ? Color.FromArgb(180, 50, 200, 50) : Color.FromArgb(140, 200, 50, 50);
-                    using (var previewBrush = new SolidBrush(previewColor))
-                    using (var previewPen = new Pen(Color.FromArgb(200, 0, 0, 0)))
-                    {
-                        for (int r = 0; r < currentBlock.height; r++)
-                        {
-                            for (int c = 0; c < currentBlock.width; c++)
-                            {
-                                if (!currentBlock.grid[r, c]) continue;
-                                float x = (hoverCol + c) * cellW;
-                                float y = (hoverRow + r) * cellH;
-                                var rect = new RectangleF(x + 1, y + 1, cellW - 2, cellH - 2);
-                                try
-                                {
-                                    string keyBase = blockTypes[currentBlockIndex].Replace(" ", "_").Replace("-", "_");
-                                    var obj = Properties.Resources.ResourceManager.GetObject(keyBase);
-                                    if (obj is System.Drawing.Image img)
-                                        g.DrawImage(img, rect);
-                                    else
-                                        g.FillRectangle(previewBrush, rect);
-                                }
-                                catch
-                                {
-                                    g.FillRectangle(previewBrush, rect);
-                                }
+                previewBlocks[idx] = null;
+                box.Invalidate();
 
-                                g.DrawRectangle(previewPen, Rectangle.Round(rect));
-                            }
-                        }
-                    }
-                }
-
-                for (int r = 0; r <= rows; r++)
-                    g.DrawLine(gridPen, 0, r * cellH, board.ClientSize.Width, r * cellH);
-                for (int c = 0; c <= cols; c++)
-                    g.DrawLine(gridPen, c * cellW, 0, c * cellW, board.ClientSize.Height);
+                board_MouseMove(board, new MouseEventArgs(MouseButtons.None, 0, Cursor.Position.X, Cursor.Position.Y, 0));
             }
-        }
 
-        private void NextPreview_Paint(object sender, PaintEventArgs e)
-        {
-            var g = e.Graphics;
-            g.Clear(nextPreview.BackColor);
-            if (nextBlock == null) return;
-            int cellSize = 24;
-            int w = nextBlock.width;
-            int h = nextBlock.height;
-            int totalW = w * cellSize;
-            int totalH = h * cellSize;
-            int startX = (nextPreview.ClientSize.Width - totalW) / 2;
-            int startY = (nextPreview.ClientSize.Height - totalH) / 2;
-
-            using (var brush = new SolidBrush(Color.FromArgb(200, 255, 200, 0)))
-            using (var pen = new Pen(Color.FromArgb(120, 0, 0, 0)))
+            else if (e.Button == MouseButtons.Right)
             {
-                for (int r = 0; r < h; r++)
-                {
-                    for (int c = 0; c < w; c++)
-                    {
-                        if (!nextBlock.grid[r, c]) continue;
-                        var rect = new Rectangle(startX + c * cellSize, startY + r * cellSize, cellSize - 2, cellSize - 2);
-                        try
-                        {
-                            string keyBase = blockTypes[nextBlockIndex].Replace(" ", "_").Replace("-", "_");
-                            var obj = Properties.Resources.ResourceManager.GetObject(keyBase);
-                            if (obj is System.Drawing.Image img)
-                                g.DrawImage(img, rect);
-                            else
-                                g.FillRectangle(brush, rect);
-                        }
-                        catch
-                        {
-                            g.FillRectangle(brush, rect);
-                        }
-                        g.DrawRectangle(pen, rect);
-                    }
-                }
-            }
-        }
-
-        private void Board_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (mainBoard == null || mainBoard.Board == null) return;
-            int rows = mainBoard.Board.GetLength(0);
-            int cols = mainBoard.Board.GetLength(1);
-
-            int col = (int)(e.X * cols / (float)board.ClientSize.Width);
-            int row = (int)(e.Y * rows / (float)board.ClientSize.Height);
-
-            if (row != hoverRow || col != hoverCol)
-            {
-                hoverRow = row;
-                hoverCol = col;
-                board.Invalidate();
-            }
-        }
-
-        private void Board_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (mainBoard == null || mainBoard.Board == null) return;
-
-            int rows = mainBoard.Board.GetLength(0);
-            int cols = mainBoard.Board.GetLength(1);
-
-            int col = (int)(e.X * cols / (float)board.ClientSize.Width);
-            int row = (int)(e.Y * rows / (float)board.ClientSize.Height);
-
-            if (row < 0 || row >= rows || col < 0 || col >= cols) return;
-
-            if (e.Button == MouseButtons.Right)
-            {
-                var any = FindAnyPlaceableBlock();
-                if (any != null)
-                {
-                    nextBlockIndex = any.Item1;
-                    nextBlock = any.Item2;
-                    nextPreview.Invalidate();
-                }
                 return;
             }
-            if (currentBlock == null) return;
-
-            bool fits = (row + currentBlock.height <= rows) && (col + currentBlock.width <= cols);
-            if (!fits)
-            {
-                System.Media.SystemSounds.Beep.Play();
-                return;
-            }
-
-            if (currentBlock.Can_Place(mainBoard, row, col))
-            {
-                if (mainBoard.Place(currentBlock, row, col))
-                {
-                    score++;
-                    UpdateScoreLabel();
-
-                    if (!HasAnyPlacementForAnyBlock())
-                    {
-                        var res = MessageBox.Show(this, "Thua cmmr", "Game Over", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                        if (res == DialogResult.Yes)
-                        {
-                            ResetBoard();
-                            return;
-                        }
-                        else
-                        {
-                            this.Close();
-                            return;
-                        }
-                    }
-
-                    SpawnNextBlockAsCurrent();
-                    board.Invalidate();
-                    nextPreview.Invalidate();
-                }
-                else
-                    System.Media.SystemSounds.Beep.Play();
-            }
-            else
-            {
-                System.Media.SystemSounds.Beep.Play();
-            }
         }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var res = MessageBox.Show(this, "EXIT", "sang an cut", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (res == DialogResult.Yes)
-                this.Close();
-        }
-
-        private void Form1_Load(object sender, EventArgs e) { }
     }
 }

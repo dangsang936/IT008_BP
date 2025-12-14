@@ -9,9 +9,24 @@ namespace UI
     {
         Timer fadeOutTimer;
 
+
         public MenuForm()
         {
             InitializeComponent();
+            try
+            {
+                AudioManager.PlayLooping("alterbgm");
+            }
+            catch
+            {
+
+            }
+
+
+            this.FormClosed += (s, e) =>
+            {
+                try { AudioManager.Stop("alterbgm"); } catch { }
+            };
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.FromArgb(23, 86, 191);
             this.ClientSize = new Size(800, 600);
@@ -55,6 +70,7 @@ namespace UI
 
             Action positionControls = () =>
             {
+                
                 int logoWidth = (int)(this.ClientSize.Width * 0.6);
                 logoWidth = Math.Max(240, Math.Min(logoWidth, 720));
                 int logoHeight = logoWidth / 3;
@@ -103,6 +119,8 @@ namespace UI
 
         private void BtnPlay_Click(object sender, EventArgs e)
         {
+            
+            AudioManager.Play("button_click");
             fadeOutTimer = new Timer();
             fadeOutTimer.Interval = 20;
             fadeOutTimer.Tick += FadeOutTimer_Tick;
@@ -112,6 +130,8 @@ namespace UI
 
         private void BtnExit_Click(object sender, EventArgs e)
         {
+            
+            AudioManager.Play("button_click");
             fadeExitTimer = new Timer();
             fadeExitTimer.Interval = 20;
             fadeExitTimer.Tick += FadeExitTimer_Tick;
@@ -140,11 +160,21 @@ namespace UI
             else
             {
                 fadeOutTimer.Stop();
-                Form1 game = new Form1();
+                maingame game = new maingame();
                 game.FormClosed += (s2, e2) =>
                 {
+                    AudioManager.Play("button_click");
                     this.Opacity = 0;
                     this.Show();
+                    try
+                    {
+                        AudioManager.PlayLooping("alterbgm");
+                    }
+                    catch
+                    {
+
+                    }
+
                     Timer fadeInTimer = new Timer();
                     fadeInTimer.Interval = 20;
                     fadeInTimer.Tick += (s3, e3) =>
@@ -157,8 +187,9 @@ namespace UI
                     fadeInTimer.Start();
                 };
 
-                game.Show();
+                game.Show();               
                 this.Hide();
+                
             }
         }
     }

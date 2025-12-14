@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LOGIC
 {
-    //lớp này để làm kho chứa tất cả các loại block và túi có sẵn  
+    //lớp này để làm kho chứa tất cả các loại block và túi có sẵn 
     public class Storage
     {
         // tất cả các tên của loại khối quay 0 độ
@@ -19,27 +19,34 @@ namespace LOGIC
 
         // lưu trữ tất cả các khối với tên và góc quay tương ứng
         // key: (tên khối, góc quay), value: dữ liệu khối
-        public Dictionary<(string,int), BlockData> Shapes {  get; set; }
+        public Dictionary<(string, int), BlockData> Shapes { get; set; }
 
         //lưu trữ tổng tỉ lệ cho từng loại block
         //key: tên khối, value: tỉ lệ
-        public Dictionary<string, int> Rate {  get; set; }
+        public Dictionary<string, int> Rate { get; set; }
 
-        public Queue<BlockData> Bag {  get; set; }
+        public Queue<BlockData> Bag { get; set; }
+
+        // KHAI BÁO đối tượng Random MỘT LẦN duy nhất
+        private Random rand;
 
         public Storage()
         {
+            // KHỞI TẠO đối tượng Random MỘT LẦN duy nhất
+            rand = new Random();
+
+            Bag = new Queue<BlockData>();
+
             //Khởi tạo các khối trong nhà máy khối
             Shapes = new Dictionary<(string, int), BlockData>();
             foreach (string name in Type_Name)
-            {               
+            {
                 for (int i = 0; i < Rotation_Array.Length; i++)
                 {
                     BlockData block = new BlockData(name);
                     block.Rotate(Rotation_Array[i]);
-                    Shapes.Add((name, Rotation_Array[i]), block);                   
+                    Shapes.Add((name, Rotation_Array[i]), block);
                 }
-
             }
 
             //Khởi tạo tỉ lệ xuất hiện cho từng loại khối
@@ -69,23 +76,25 @@ namespace LOGIC
 
         public BlockData GetRandomBlock()
         {
-            string name="dot";
-            Random r = new Random();
+            string name = "dot";
+            // SỬ DỤNG đối tượng 'rand' đã được khởi tạo MỘT LẦN
             int cur_rate = 1;
-            int random_num = r.Next(100) + 1; // khởi tạo 1 số random từ 1 -> 100
+            int random_num = rand.Next(100) + 1; // khởi tạo 1 số random từ 1 -> 100
             foreach (var tmp in Rate)
             {
                 cur_rate += tmp.Value;
-                if(cur_rate > random_num)
+                if (cur_rate > random_num)
                 {
                     name = tmp.Key; // lấy tên của nhóm block
                     break;
-                }    
+                }
             }
 
             // khởi tạo 1 góc độ quay ngẫu nhiên 0 --> 3 tương đương với 0 -> 270 độ
-            int random_rotation = r.Next(4);
-            return Shapes[(name,random_rotation * 4)];
+            int random_rotation = rand.Next(4);
+            int rot = Rotation_Array[random_rotation];
+
+            return Shapes[(name, rot)];
         }
 
         //hàm thêm 15 khối vào bag

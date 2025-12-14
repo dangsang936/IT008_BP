@@ -44,7 +44,7 @@ namespace UI
                         player.settings.volume = volumeSFX;
                     else
                         player.settings.volume = volumeMenuBGM;
-
+                    
                     sounds[name] = player;
                 }
             }

@@ -15,7 +15,7 @@ namespace LOGIC
         public string Type_name;
         public int Rotation_Index;  //các góc quay 0, 90, 180, 270 độ
 
-        public BlockData(string  name)
+        public BlockData(string name)
         {
             Type_name = name;
             this.Rotation_Index = 0;
