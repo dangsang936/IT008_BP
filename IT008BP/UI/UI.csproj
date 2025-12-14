@@ -36,7 +36,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -210,7 +211,6 @@
     </Resource>
     <Content Include="Assets\button\quit.png" />
     <Content Include="Assets\button\setting.png" />
-    <Content Include="icon.ico" />
     <Content Include="SOUNDS\BGM\alterbgm.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
