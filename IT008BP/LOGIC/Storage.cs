@@ -51,27 +51,27 @@ namespace LOGIC
 
             //Khởi tạo tỉ lệ xuất hiện cho từng loại khối
             Rate = new Dictionary<string, int>();
-            // --- NHÓM 1: CỨU HỘ & DỄ (Xuất hiện nhiều nhất) ---
-            Rate.Add("dot", 18); // 1x1: Cần thiết nhất để sửa sai
-            Rate.Add("I2", 15); // 1x2: Rất dễ đặt
-            Rate.Add("O", 14); // 2x2: Dễ tạo cụm vuông
+            // --- NHÓM 1: CỨU HỘ & DỄ  ---
+            Rate.Add("dot", 8); // 1x1: Cần thiết nhất để sửa sai
+            Rate.Add("I2", 8); // 1x2: Rất dễ đặt
+            Rate.Add("O", 8); // 2x2: Dễ tạo cụm vuông
 
             // --- NHÓM 2: PHỔ THÔNG (Xuất hiện vừa phải) ---
-            Rate.Add("I3", 12); // 1x3: Dùng dọn hàng tốt
-            Rate.Add("T", 10); // Chữ T
-            Rate.Add("L", 10); // Chữ L
-            Rate.Add("J", 10); // Chữ J
+            Rate.Add("I3", 9); // 1x3: Dùng dọn hàng tốt
+            Rate.Add("T", 9); // Chữ T
+            Rate.Add("L", 9); // Chữ L
+            Rate.Add("J", 9); // Chữ J
 
             // --- NHÓM 3: KHÓ CHỊU (Xuất hiện ít hơn) ---
-            Rate.Add("S", 8); // Zic-zac khó chịu
-            Rate.Add("Z", 8); // Zic-zac ngược
+            Rate.Add("S", 7); // Zic-zac khó chịu
+            Rate.Add("Z", 7); // Zic-zac ngược
             Rate.Add("I4", 6); // Thanh dài 4 ô (Tetris bar)
 
             // --- NHÓM 4: KHỐI KHỔNG LỒ (Hiếm - Để thử thách) ---
             Rate.Add("L3", 5); // Chữ L to (3x3)
             Rate.Add("J3", 5); // Chữ J to (3x3)
-            Rate.Add("I5", 3); // Thanh dài 5 ô (Rất khó đặt)
-            Rate.Add("O3", 2); // Khối vuông 3x3 (Sát thủ bàn chơi)
+            Rate.Add("I5", 5); // Thanh dài 5 ô (Rất khó đặt)
+            Rate.Add("O3", 5); // Khối vuông 3x3 (Sát thủ bàn chơi)
         }
 
         public BlockData GetRandomBlock()
