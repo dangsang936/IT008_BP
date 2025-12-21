@@ -66,6 +66,7 @@
     <Compile Include="BlockData.cs" />
     <Compile Include="MainBoard.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Score.cs" />
     <Compile Include="Storage.cs" />
   </ItemGroup>
   <ItemGroup>
