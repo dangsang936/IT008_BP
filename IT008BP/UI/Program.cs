@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.Json;
+using System.IO;
 
 namespace UI
 {
@@ -14,7 +15,17 @@ namespace UI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form2());
+            try
+            {
+                AudioManager.LoadSounds();
+                AudioManager.StopAll();
+                AudioManager.PlayLooping("alterbgm");
+            }
+            catch
+            {
+
+            }
+            Application.Run(new MenuForm());
         }
     }
 }

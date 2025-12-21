@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,149 +6,17 @@ using System.Threading.Tasks;
 
 namespace LOGIC
 {
+    // lớp này chỉ định 1 block cụ thể đang hiện trên màn hình
     public class Block
     {
-        public bool[,] grid;
-        public int height;
-        public int width;
-        string Type_name;
-        public void Create_Block(string name)
+        public int X {get; set;}
+        public int Y {get; set;}
+        public BlockData data { get; set; }
+        public Block()
         {
-            Type_name = name;
-            switch (Type_name)
-            {
-                case "3 Verticle Line Block":
-                    int height = 3;
-                    width = 1;
-                    grid = new bool[3, 1] { { true }, { true }, { true } };
-                    break;
-                case "4 Verticle Line Block":
-                    height = 4;
-                    width = 1;
-                    grid = new bool[4, 1] { { true }, { true }, { true }, { true } };
-                    break;
-                case "3 Horizontal Line Block":
-                    height = 1;
-                    width = 3;
-                    grid = new bool[1, 3] { { true, true, true } };
-                    break;
-                case "4 Horizontal Line Block":
-                    height = 1;
-                    width = 4;
-                    grid = new bool[1, 4] { { true, true, true, true } };
-                    break;
-                case "L Type":
-                    height = 3;
-                    width = 2;
-                    grid = new bool[3, 2] { { true, false }, { true, false }, { true, true } };
-                    break;
-                case "J Type":
-                    height = 3;
-                    width = 2;
-                    grid = new bool[3, 2] { { false, true }, { false, true }, { true, true } };
-                    break;
-                case "Long L Type":
-                    height = 3;
-                    width = 3;
-                    grid = new bool[3, 3] { { true, false, false }, { true, false, false }, { true, true, true } };
-                    break;
-                case "Long J Type":
-                    height = 3;
-                    width = 3;
-                    grid = new bool[3, 3] { { false, false, true }, { false, false, true }, { true, true, true } };
-                    break;
-                case "F Type":
-                    height = 3;
-                    width = 2;
-                    grid = new bool[3, 2] { { true, true }, { true, false }, { true, false } };
-                    break;
-                case "7 Type":
-                    height = 3;
-                    width = 2;
-                    grid = new bool[3, 2] { { true, true }, { false, true }, { false, true } };
-                    break;
-                case "Long F Type":
-                    height = 3;
-                    width = 3;
-                    grid = new bool[3, 3] { { true, true, true }, { true, false, false }, { true, false, false } };
-                    break;
-                case "Long 7 Type":
-                    height = 3;
-                    width = 3;
-                    grid = new bool[3, 3] { { true, true, true }, { false, false, true }, { false, false, true } };
-                    break;
-                case "Z Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { true, true, false }, { false, true, true } };
-                    break;
-                case "S Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { false, true, true }, { true, true, false } };
-                    break;
-                case "O Type":
-                    height = 2;
-                    width = 2;
-                    grid = new bool[2, 2] { { true, true }, { true, true } };
-                    break;
-                case "Big O Type":
-                    height = 3;
-                    width = 3;
-                    grid = new bool[3, 3] { { true, true, true }, { true, true, true }, { true, true, true } };
-                    break;
-                case "4 Type":
-                    height = 3;
-                    width = 2;
-                    grid = new bool[3, 2] { { true, false }, { true, true }, { false, true } };
-                    break;
-                case "Reverse 4 Type":
-                    height = 3;
-                    width = 2;
-                    grid = new bool[3, 2] { { false, true }, { true, true }, { true, false } };
-                    break;
-                case "T Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { true, true, true }, { false, true, false } };
-                    break;
-                case "Reverse T Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { false, true, false }, { true, true, true } };
-                    break;
-                case "7 Up Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { true, true, true }, { true, false, false } };
-                    break;
-                case "F Up Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { true, true, true }, { false, false, true } };
-                    break;
-                case "F Down Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { true, false, false }, { true, true, true } };
-                    break;
-                case "7 Down Type":
-                    height = 2;
-                    width = 3;
-                    grid = new bool[2, 3] { { false, false, true }, { true, true, true } };
-                    break;
-                
-            }
+            //mặc định X,Y có tọa độ -1 tức là block đang ở ngoài, chưa đăt vào bảng
+            int X = -1; 
+            int Y = -1;
         }
-        // hàm kiểm tra xem block có thể đặt vào vị trí (x,y) của bảng board không
-        public bool Can_Place (ref MainBord board ,int x, int y ) 
-        {
-            for (int i = 0; i < height; i++)
-                for (int j = 0; j < width; j++)
-                    if (grid[i, j] && board.Board[i + x, j + y])
-                        return false;
-            return true;
-        }
-        
     }
 }
