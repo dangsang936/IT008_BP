@@ -20,13 +20,6 @@ namespace UI
             this.UpdateStyles();
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e)
-        {
-            
-        }
-
-        
-
     }
 
     public partial class maingame : Form
@@ -48,7 +41,12 @@ namespace UI
         private MainBoard gameLogic;
         private BlockData blockData;
         private Block draggingBlock = null;
-        private int draggingBlockSourceIndex = -1; 
+        private int draggingBlockSourceIndex = -1;
+
+        private readonly Color PreviewBlockColor = Color.FromArgb(255, 248, 220); 
+        private readonly Color BoardBlockColor = Color.FromArgb(218, 170, 40); 
+        private readonly Color BlockBorderColor = Color.DarkGoldenrod;
+
 
         private Block block;
         private BlockData[] previewBlocks = new BlockData[3];
@@ -56,6 +54,12 @@ namespace UI
 
         private Bitmap backBuffer;
         private Graphics bufferG;
+
+        private Timer waveTimer;
+        private int waveIndex = 0;
+        private List<List<Point>> waveLayers = new List<List<Point>>();
+        private bool isWaveClearing = false;
+
         public maingame()
         {
             InitializeComponent();
@@ -67,7 +71,11 @@ namespace UI
             block = new Block();
             SetupUI();
 
-            
+            waveTimer = new Timer();
+            waveTimer.Interval = 40; 
+            waveTimer.Tick += WaveTick;
+
+
             try
             {
                 AudioManager.PlayLooping("alterbgm");
@@ -76,7 +84,6 @@ namespace UI
             {
                 
             }
-
             
             this.FormClosed += (s, e) =>
             {
@@ -164,6 +171,66 @@ namespace UI
 
         }
 
+        private void StartWaveClear()
+        {
+            waveLayers.Clear();
+            waveIndex = 0;
+            isWaveClearing = true;
+            AudioManager.Play("score");
+            foreach (int r in gameLogic.CheckRowsFull())
+            {
+                for (int x = 0; x < cols; x++)
+                {
+                    if (waveLayers.Count <= x)
+                        waveLayers.Add(new List<Point>());
+
+                    waveLayers[x].Add(new Point(x, r));
+                }
+            }
+            int offset = waveLayers.Count;
+            foreach (int c in gameLogic.CheckColumnsFull())
+            {
+                for (int y = 0; y < rows; y++)
+                {
+                    int idx = offset + y;
+                    if (waveLayers.Count <= idx)
+                        waveLayers.Add(new List<Point>());
+
+                    waveLayers[idx].Add(new Point(c, y));
+                }
+            }
+
+            waveTimer.Start();
+        }
+
+
+        private void WaveTick(object sender, EventArgs e)
+        {
+            waveIndex++;
+            if (waveIndex >= waveLayers.Count)
+            {
+                waveTimer.Stop();
+                isWaveClearing = false;
+
+                gameLogic.Clear(); 
+                waveLayers.Clear();
+                board.Invalidate();
+                if (IsAllClear()) {
+                    HandleAllClear();
+                }
+                if (gameOver())
+                {
+                    waveTimer.Stop();
+                    waveTimer.Dispose();
+                    MessageBox.Show("GAME OVER");
+                    this.Close();
+                }
+                return;
+            }
+            board.Invalidate();
+        }
+
+
         public void GeneratePreviewBlocks()
         {
             for (int i = 0; i < 3; i++)
@@ -198,7 +265,12 @@ namespace UI
 
                     if (rowsCleared > 0 || colsCleared > 0)
                     {
-                        gameLogic.Clear();
+                        if (rowsCleared > 0 || colsCleared > 0)
+                        {
+                            UpdateScore((rowsCleared + colsCleared) * 20);
+                            StartWaveClear();
+                        }
+
 
                         int totalClear = rowsCleared + colsCleared;
                         UpdateScore(totalClear * 20);
@@ -209,13 +281,18 @@ namespace UI
                     highlightCells.Clear();
                     board.Invalidate();
                     RefreshPreviewSlots();
-                    if (gameOver())
+                    if (isWaveClearing)
+                        return;
+                    if (!isWaveClearing && gameOver())
                     {
+                        waveTimer.Stop();
+                        waveTimer.Dispose();
 
                         MessageBox.Show("GAME OVER");
                         MessageBox.Show($"Final Score: {currScore}");
 
                         AudioManager.Play("gameover");
+
                         this.Close();
                     }
                 }
@@ -242,7 +319,6 @@ namespace UI
 
         private void RefreshPreviewSlots()
         {
-            // kiểm tra có còn block nào không
             bool allEmpty = true;
             for (int i = 0; i < 3; i++)
             {
@@ -252,12 +328,9 @@ namespace UI
                     break;
                 }
             }
-
-            // nếu không trống hết thì không làm gì
             if (!allEmpty)
                 return;
             AudioManager.Play("create"); 
-            // === tạo mới 3 block ===
             for (int i = 0; i < 3; i++)
             {
 
@@ -265,15 +338,58 @@ namespace UI
                 blockPanel.Controls[i].Invalidate();
             }
         }
+        private void HandleAllClear()
+        {
+            UpdateScore(100);
+            AudioManager.Play("AllClear");
+            FlashBoard();
+        }
+        private int flashCount = 0;
+        private Timer flashTimer;
+
+        private void FlashBoard()
+        {
+            flashCount = 0;
+            flashTimer = new Timer();
+            flashTimer.Interval = 60;
+
+            flashTimer.Tick += (s, e) =>
+            {
+                board.BackColor = (flashCount % 2 == 0)
+                    ? Color.White
+                    : Color.FromArgb(34, 49, 81);
+
+                board.Invalidate();
+                flashCount++;
+
+                if (flashCount >= 6)
+                {
+                    flashTimer.Stop();
+                    flashTimer.Dispose();
+                    board.BackColor = Color.FromArgb(34, 49, 81);
+                }
+            };
+
+            flashTimer.Start();
+        }
+
+
+        private bool IsAllClear()
+        {
+            for (int y = 0; y < rows; y++)
+                for (int x = 0; x < cols; x++)
+                    if (gameLogic.Grid[y, x])
+                        return false;
+
+            return true;
+        }
+
 
         public void UpdateScore(int points)
         {
             currScore += points;
             scorePanel.Text = $"Score: {currScore}";
-            if (currScore % 100 == 0 && currScore > 0)
-            {
-                AudioManager.Play("score");
-            }
+            
         }
 
         private PictureBox CreatePreviewBox()
@@ -307,16 +423,19 @@ namespace UI
             var g = e.Graphics;
             g.Clear(box.BackColor);
 
-                                        
-            int maxDim = Math.Max(data.width, data.height);
-            float drawSize = box.Width * 0.8f;
-            float cell = drawSize / (float)maxDim;
-            float offsetX = (box.Width - data.width * cell) / 2.0f;
-            float offsetY = (box.Height - data.height * cell) / 2.0f;
+
+            const int PREVIEW_GRID = 3; 
+
+            float padding = box.Width * 0.15f;
+            float drawSize = box.Width - padding * 2;
+            float cell = drawSize / PREVIEW_GRID;
+            float offsetX = (box.Width - data.width * cell) / 2f;
+            float offsetY = (box.Height - data.height * cell) / 2f;
 
 
-            using (Brush b = new SolidBrush(System.Drawing.Color.LightYellow))
-            using (Pen p = new Pen(System.Drawing.Color.DarkGoldenrod, 2))
+
+            using (Brush b = new SolidBrush(PreviewBlockColor))
+            using (Pen p = new Pen(BlockBorderColor, 2))
             {
                 for (int i = 0; i < data.height; i++)
                 {
@@ -384,23 +503,28 @@ namespace UI
             float cw = cellSize;
             float ch = cellSize;
 
-            using (var pen = new Pen(Color.LightGray, 1))
-            {
-                for (int x = 0; x <= cols; x++)
-                    bufferG.DrawLine(pen, x * cw, 0, x * cw, board.Height);
 
-                for (int y = 0; y <= rows; y++)
-                    bufferG.DrawLine(pen, 0, y * ch, board.Width, y * ch);
-            }
 
-            using (Brush b = new SolidBrush(Color.Goldenrod))
+            using (Brush b = new SolidBrush(BoardBlockColor))
             {
                 for (int y = 0; y < rows; y++)
                     for (int x = 0; x < cols; x++)
                         if (gameLogic.Grid[y, x])
                             bufferG.FillRectangle(b, x * cw, y * ch, cw, ch);
             }
-
+            using (Pen p = new Pen(BlockBorderColor, 2))
+            {
+                for (int y = 0; y < rows; y++)
+                    for (int x = 0; x < cols; x++)
+                        if (gameLogic.Grid[y, x])
+                            bufferG.DrawRectangle(
+                                p,
+                                x * cw,
+                                y * ch,
+                                cw,
+                                ch
+                            );
+            }
             using (Brush b = new SolidBrush(
                 highlightValid ?
                 Color.FromArgb(120, 0, 255, 0) :
@@ -408,6 +532,38 @@ namespace UI
             {
                 foreach (var cell in highlightCells)
                     bufferG.FillRectangle(b, cell.X * cw, cell.Y * ch, cw, ch);
+            }
+            if (isWaveClearing)
+            {
+               
+                using (Brush b = new SolidBrush(Color.FromArgb(180, Color.White)))
+                {
+                    for (int i = 0; i <= waveIndex && i < waveLayers.Count; i++)
+                    {
+                        foreach (var p in waveLayers[i])
+                        {
+                            if (gameLogic.Grid[p.Y, p.X])
+                            {
+                                bufferG.FillRectangle(
+                                    b,
+                                    p.X * cellSize,
+                                    p.Y * cellSize,
+                                    cellSize,
+                                    cellSize
+                                );
+                            }
+
+                        }
+                    }
+                }
+            }
+            using (var pen = new Pen(Color.LightGray, 1))
+            {
+                for (int x = 0; x <= cols; x++)
+                    bufferG.DrawLine(pen, x * cw, 0, x * cw, board.Height);
+
+                for (int y = 0; y <= rows; y++)
+                    bufferG.DrawLine(pen, 0, y * ch, board.Width, y * ch);
             }
         }
 
@@ -504,5 +660,14 @@ namespace UI
                 return;
             }
         }
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            waveTimer?.Stop();
+            waveTimer?.Dispose();
+            bufferG?.Dispose();
+            backBuffer?.Dispose();
+            base.OnFormClosed(e);
+        }
+
     }
 }
