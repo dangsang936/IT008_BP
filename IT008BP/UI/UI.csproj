@@ -188,6 +188,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SOUNDS\SFX\wrong.mp3" />
     <Resource Include="Assets\Big O.png" />
     <Resource Include="Assets\Blue.png" />
     <Resource Include="Assets\Green.png" />

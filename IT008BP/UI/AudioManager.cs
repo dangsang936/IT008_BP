@@ -10,10 +10,6 @@ namespace UI
         // Dictionary lưu tất cả âm thanh
         private static Dictionary<string, WindowsMediaPlayer> sounds = new Dictionary<string, WindowsMediaPlayer>();
 
-        // Âm lượng mặc định theo nhóm
-        private static int volumeMenuBGM = 30;
-        private static int volumeSFX = 100;
-
         // Load nhạc Menu và BGM
         public static void LoadSounds()
         {
@@ -38,12 +34,6 @@ namespace UI
                     var player = new WindowsMediaPlayer();
                     player.URL = file;
                     player.settings.setMode("loop", false); // mặc định không lặp
-
-                    // Áp dụng âm lượng theo nhóm
-                    if (relativePath.ToLower().Contains("sfx"))
-                        player.settings.volume = volumeSFX;
-                    else
-                        player.settings.volume = volumeMenuBGM;
                     
                     sounds[name] = player;
                 }
@@ -62,13 +52,6 @@ namespace UI
                     var player = new WindowsMediaPlayer();
                     player.URL = path;
                     player.settings.setMode("loop", false);
-
-                    // Áp dụng âm lượng theo nhóm
-                    if (relativePath.ToLower().Contains("sfx"))
-                        player.settings.volume = volumeSFX;
-                    else
-                        player.settings.volume = volumeMenuBGM;
-
                     sounds[name] = player;
                 }
             }
@@ -97,21 +80,39 @@ namespace UI
             }
         }
 
-        // Dừng nhạc
-        public static void Stop(string name)
+        // Chỉnh âm lượng 1 sound (0–100)
+        public static void SetVolume(string name, int volume)
         {
             name = name.ToLower();
+            volume = Math.Max(0, Math.Min(100, volume));
+
             if (sounds.ContainsKey(name))
             {
-                sounds[name].controls.stop();
+                sounds[name].settings.volume = volume;
             }
         }
 
-        // Dừng tất cả âm thanh
         public static void StopAll()
         {
             foreach (var player in sounds.Values)
+            {
                 player.controls.stop();
+            }
         }
+
+
+        // Dừng tất cả SFX (không dừng BGM / Menu)
+        public static void MuteSFX()
+        {
+            foreach (var player in sounds.Values)
+            {
+                if (player.URL.ToLower().Contains(@"\sfx\"))
+                {
+                    player.controls.stop();
+                }
+            }
+        }
+        public static void Stop(string name) { name = name.ToLower(); if (sounds.ContainsKey(name)) { sounds[name].controls.stop(); } }
+
     }
 }
