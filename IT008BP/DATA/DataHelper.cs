@@ -1,81 +1,79 @@
-﻿    using System;
-    using System.Data.SQLite;
-    using System.IO;
+﻿using System;
+using System.Data.SQLite;
+using System.IO;
 
-    namespace DATA
+namespace DATA
+{
+    public class DataHelper
     {
-        public class DataHelper
+        private readonly string dbFile;
+        private readonly string connectionString;
+
+        public DataHelper(string fileName = "gamescore.db")
         {
-            private readonly string dbFile;
-            private readonly string connectionString;
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            dbFile = Path.Combine(baseDir, fileName);
+            connectionString = $"Data Source={dbFile};Version=3;";
 
-            public DataHelper(string file)
+            if (!File.Exists(dbFile))
+                CreateDatabase();
+        }
+
+        private void CreateDatabase()
+        {
+            SQLiteConnection.CreateFile(dbFile);
+
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                dbFile = file;
-                connectionString = $"Data Source={dbFile};Version=3;";
+                conn.Open();
 
-                if (!File.Exists(dbFile))
+                using (var cmd = new SQLiteCommand(conn))
                 {
-                    CreateDatabase();
+                    cmd.CommandText = @"
+                        CREATE TABLE IF NOT EXISTS GameData (
+                            Id INTEGER PRIMARY KEY CHECK(Id = 1),
+                            Highscore INTEGER NOT NULL
+                        );";
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = @"
+                        INSERT OR IGNORE INTO GameData (Id, Highscore)
+                        VALUES (1, 0);";
+                    cmd.ExecuteNonQuery();
                 }
             }
+        }
 
-            // Tạo DB + bảng
-            private void CreateDatabase()
+        public int GetHighscore()
+        {
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                SQLiteConnection.CreateFile(dbFile);
+                conn.Open();
 
-                using (var conn = new SQLiteConnection(connectionString))
+                using (var cmd = new SQLiteCommand(
+                    "SELECT Highscore FROM GameData WHERE Id = 1;", conn))
                 {
-                    conn.Open();
-
-                    string sql =
-                    @"CREATE TABLE GameData (
-                        Id INTEGER PRIMARY KEY,
-                        Highscore INTEGER NOT NULL
-                      );
-
-                      INSERT INTO GameData (Highscore) VALUES (0);";
-
-                    using (var cmd = new SQLiteCommand(sql, conn))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
+                    object result = cmd.ExecuteScalar();
+                    return result == null ? 0 : Convert.ToInt32(result);
                 }
             }
+        }
 
-            // Lấy highscore
-            public int GetHighscore()
+        public void UpdateHighscore(int score)
+        {
+            using (var conn = new SQLiteConnection(connectionString))
             {
-                using (var conn = new SQLiteConnection(connectionString))
+                conn.Open();
+
+                using (var cmd = new SQLiteCommand(
+                    @"UPDATE GameData 
+                      SET Highscore = @score 
+                      WHERE Id = 1 AND @score > Highscore;", conn))
                 {
-                    conn.Open();
-
-                    string sql = "SELECT Highscore FROM GameData LIMIT 1;";
-                    using (var cmd = new SQLiteCommand(sql, conn))
-                    {
-                        return Convert.ToInt32(cmd.ExecuteScalar());
-                    }
-                }
-            }
-
-            // Cập nhật highscore
-            public void UpdateHighscore(int score)
-            {
-                int current = GetHighscore();
-                if (score <= current) return;
-
-                using (var conn = new SQLiteConnection(connectionString))
-                {
-                    conn.Open();
-
-                    string sql = "UPDATE GameData SET Highscore = @score;";
-                    using (var cmd = new SQLiteCommand(sql, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@score", score);
-                        cmd.ExecuteNonQuery();
-                    }
+                    cmd.Parameters.AddWithValue("@score", score);
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
     }
+}
