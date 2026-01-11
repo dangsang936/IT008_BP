@@ -215,7 +215,6 @@
     <Content Include="SOUNDS\BGM\alterbgm.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="icon.ico" />
     <Content Include="SOUNDS\BGM\BGM.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

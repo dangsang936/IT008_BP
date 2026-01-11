@@ -29,6 +29,8 @@ namespace UI
         private PictureBox preview1, preview2, preview3;
         private Label scorePanel;
         private int currScore = 0;
+        private int highScore = 0;
+        private DATA.DataHelper dataHelper;
 
         private const int rows = 8;
         private const int cols = 8;
@@ -74,6 +76,9 @@ namespace UI
             waveTimer = new Timer();
             waveTimer.Interval = 40; 
             waveTimer.Tick += WaveTick;
+            dataHelper = new DATA.DataHelper("gameScore.db");
+            highScore = dataHelper.GetHighscore();
+
 
 
             try
@@ -222,7 +227,10 @@ namespace UI
                 {
                     waveTimer.Stop();
                     waveTimer.Dispose();
-                    MessageBox.Show("GAME OVER");
+                    MessageBox.Show($"Điểm số cuối cùng: {currScore}","GAME OVER",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                    if (currScore > highScore)
+                        dataHelper.UpdateHighscore(currScore);
+
                     this.Close();
                 }
                 return;
@@ -288,9 +296,10 @@ namespace UI
                         waveTimer.Stop();
                         waveTimer.Dispose();
 
-                        MessageBox.Show("GAME OVER");
-                        MessageBox.Show($"Final Score: {currScore}");
-
+                        MessageBox.Show($"Điểm số cuối cùng: {currScore}", "GAME OVER", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (currScore > highScore)
+                            dataHelper.UpdateHighscore(currScore);
+                        
                         AudioManager.Play("gameover");
 
                         this.Close();
