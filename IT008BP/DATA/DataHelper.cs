@@ -11,8 +11,13 @@ namespace DATA
 
         public DataHelper(string fileName = "gamescore.db")
         {
-            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-            dbFile = Path.Combine(baseDir, fileName);
+            string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string appFolder = Path.Combine(baseDir, "BlockPuzzle");
+
+            if (!Directory.Exists(appFolder))
+                Directory.CreateDirectory(appFolder);
+
+            dbFile = Path.Combine(appFolder, fileName);
             connectionString = $"Data Source={dbFile};Version=3;";
 
             if (!File.Exists(dbFile))
