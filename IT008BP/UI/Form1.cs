@@ -62,6 +62,10 @@ namespace UI
         private List<List<Point>> waveLayers = new List<List<Point>>();
         private bool isWaveClearing = false;
 
+        bool bgmOn = true;
+        bool sfxOn = true;
+
+
         public maingame()
         {
             InitializeComponent();
@@ -83,7 +87,7 @@ namespace UI
 
             try
             {
-                AudioManager.PlayLooping("alterbgm");
+                AudioManager.PlayLooping("BGM");
             }
             catch
             {
@@ -92,7 +96,7 @@ namespace UI
             
             this.FormClosed += (s, e) =>
             {
-                try { AudioManager.Stop("alterbgm"); } catch { }
+                try { AudioManager.Stop("BGM"); } catch { }
             };
         }
         private void InitBuffer()
@@ -172,6 +176,47 @@ namespace UI
                 InitBuffer();
                 board.Invalidate();
             };
+
+            PictureBox btnBGM = new PictureBox
+            {
+                Size = new Size (75, 75),
+                Location = new Point(board.Right + 170, scorePanel.Bottom + 300),
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Cursor = Cursors.Hand,
+                Image = Properties.Resources.music_on
+            };
+
+            PictureBox btnSFX = new PictureBox
+            {
+                Size = new Size(75, 75),
+                Location = new Point(board.Right + 270, scorePanel.Bottom + 300),
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Cursor = Cursors.Hand,
+                Image = Properties.Resources.unmute
+            };
+
+            this.Controls.Add(btnBGM);
+            this.Controls.Add(btnSFX);
+
+            bool bgmOn = true;
+            bool sfxOn = true;
+
+            btnBGM.Click += (s, e) =>
+            {
+                AudioManager.ToggleBGM();
+                btnBGM.Image = AudioManager.IsBGMMuted()
+                    ? Properties.Resources.music_off
+                    : Properties.Resources.music_on;
+            };
+
+            btnSFX.Click += (s, e) =>
+            {
+                AudioManager.ToggleSFX();
+                btnSFX.Image = AudioManager.IsSFXMuted()
+                    ? Properties.Resources.mute
+                    : Properties.Resources.unmute;
+            };
+
             InitBuffer();
 
         }
