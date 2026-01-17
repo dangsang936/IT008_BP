@@ -15,7 +15,7 @@ namespace UI
             InitializeComponent();
             try
             {
-                AudioManager.PlayLooping("alterbgm");
+                AudioManager.PlayLooping("menu");
             }
             catch
             {
@@ -25,7 +25,7 @@ namespace UI
 
             this.FormClosed += (s, e) =>
             {
-                try { AudioManager.Stop("alterbgm"); } catch { }
+                try { AudioManager.Stop("menu"); } catch { }
             };
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.FromArgb(23, 86, 191);
@@ -168,7 +168,7 @@ namespace UI
                     this.Show();
                     try
                     {
-                        AudioManager.PlayLooping("alterbgm");
+                        AudioManager.PlayLooping("BGM");
                     }
                     catch
                     {

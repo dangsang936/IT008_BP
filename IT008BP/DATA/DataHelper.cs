@@ -9,7 +9,7 @@ namespace DATA
         private readonly string dbFile;
         private readonly string connectionString;
 
-        public DataHelper(string fileName = "gamescore.db")
+         public DataHelper(string fileName = "gamescore.db")
         {
             string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string appFolder = Path.Combine(baseDir, "BlockPuzzle");

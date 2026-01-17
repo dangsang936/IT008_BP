@@ -19,7 +19,7 @@ namespace UI
             {
                 AudioManager.LoadSounds();
                 AudioManager.StopAll();
-                AudioManager.PlayLooping("alterbgm");
+                AudioManager.PlayLooping("menu");
             }
             catch
             {
