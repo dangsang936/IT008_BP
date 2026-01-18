@@ -119,5 +119,16 @@ namespace UI
             foreach (var s in sounds.Values)
                 s.controls.stop();
         }
+
+        public static string currentBGM;
+
+        public static void PlayBGM(string name)
+        {
+            if (currentBGM == name) return;
+
+            StopAll();
+            PlayLooping(name);
+            currentBGM = name;
+        }
     }
 }

@@ -84,21 +84,22 @@ namespace UI
             dataHelper = new DATA.DataHelper("gameScore.db");
             highScore = dataHelper.GetHighscore();
 
-
-
             try
             {
-                AudioManager.PlayLooping("BGM");
+                AudioManager.PlayBGM("BGM");
+
             }
-            catch
-            {
-                
-            }
-            
+            catch { }
+
             this.FormClosed += (s, e) =>
             {
-                try { AudioManager.Stop("BGM"); } catch { }
+                try
+                {
+                    AudioManager.Stop("BGM");
+                }
+                catch { }
             };
+
         }
         private void InitBuffer()
         {
@@ -195,7 +196,9 @@ namespace UI
                 Location = new Point(board.Right + 170, scorePanel.Bottom + 300),
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Cursor = Cursors.Hand,
-                Image = Properties.Resources.music_on
+                Image = AudioManager.IsBGMMuted()
+                    ? Properties.Resources.music_off
+                    : Properties.Resources.music_on
             };
 
             PictureBox btnSFX = new PictureBox
@@ -204,7 +207,9 @@ namespace UI
                 Location = new Point(board.Right + 270, scorePanel.Bottom + 300),
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Cursor = Cursors.Hand,
-                Image = Properties.Resources.unmute
+                Image = AudioManager.IsSFXMuted()
+                    ? Properties.Resources.mute
+                    : Properties.Resources.unmute
             };
 
             this.Controls.Add(btnBGM);

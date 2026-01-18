@@ -9,24 +9,26 @@ namespace UI
     {
         Timer fadeOutTimer;
 
-
         public MenuForm()
         {
             InitializeComponent();
+
             try
             {
-                AudioManager.PlayLooping("menu");
-            }
-            catch
-            {
+                AudioManager.PlayBGM("menu");
 
             }
-
+            catch { }
 
             this.FormClosed += (s, e) =>
             {
-                try { AudioManager.Stop("menu"); } catch { }
+                try
+                {
+                    AudioManager.Stop("menu");
+                }
+                catch { }
             };
+
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.FromArgb(23, 86, 191);
             this.ClientSize = new Size(800, 600);
@@ -168,7 +170,7 @@ namespace UI
                     this.Show();
                     try
                     {
-                        AudioManager.PlayLooping("BGM");
+                        AudioManager.PlayLooping("menu");
                     }
                     catch
                     {
@@ -192,5 +194,6 @@ namespace UI
                 
             }
         }
+         
     }
 }
