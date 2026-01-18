@@ -8,14 +8,14 @@ namespace UI
 {
     internal static class AudioManager
     {
-        private static Dictionary<string, WindowsMediaPlayer> sounds =
-            new Dictionary<string, WindowsMediaPlayer>();
+        private static Dictionary<string, WindowsMediaPlayer> sounds = new Dictionary<string, WindowsMediaPlayer>();
 
         private static int bgmVolume = 30;
         private static int sfxVolume = 70;
 
         public static bool bgmMuted = false;
         public static bool sfxMuted = false;
+        public static string currentBGM;
 
         public static void LoadSounds()
         {
@@ -39,13 +39,19 @@ namespace UI
                 player.URL = file;
                 player.settings.setMode("loop", false);
 
-                if (file.ToLower().Contains(@"\bgm\") || file.ToLower().Contains(@"\menu\"))
-                    player.settings.volume = bgmVolume;
+                if (IsBGM(file))
+                    player.settings.volume = bgmMuted ? 0 : bgmVolume;
                 else
-                    player.settings.volume = sfxVolume;
+                    player.settings.volume = sfxMuted ? 0 : sfxVolume;
 
                 sounds[name] = player;
             }
+        }
+
+        private static bool IsBGM(string pathOrUrl)
+        {
+            string lower = pathOrUrl.ToLower();
+            return lower.Contains(@"\bgm\") || lower.Contains(@"\menu\");
         }
 
         public static void Play(string name)
@@ -55,8 +61,9 @@ namespace UI
 
             var s = sounds[name];
 
-            if (sfxMuted && s.URL.ToLower().Contains(@"\sfx\")) return;
-            if (bgmMuted && (s.URL.ToLower().Contains(@"\bgm\") || s.URL.ToLower().Contains(@"\menu\"))) return;
+            if (sfxMuted && !IsBGM(s.URL)) return;
+
+            if (bgmMuted && IsBGM(s.URL)) return;
 
             s.controls.stop();
             s.controls.play();
@@ -69,33 +76,61 @@ namespace UI
 
             var s = sounds[name];
 
-            if (sfxMuted && s.URL.ToLower().Contains(@"\sfx\")) return;
-            if (bgmMuted && (s.URL.ToLower().Contains(@"\bgm\") || s.URL.ToLower().Contains(@"\menu\"))) return;
+            if (IsBGM(s.URL))
+            {
+                s.settings.volume = bgmMuted ? 0 : bgmVolume;
+            }
+            else 
+            {
+                if (sfxMuted) return;
+            }
 
             s.settings.setMode("loop", true);
-            s.controls.stop();
-            s.controls.play();
+            if (s.playState != WMPPlayState.wmppsPlaying)
+            {
+                s.controls.stop();
+                s.controls.play();
+            }
         }
+
+        public static void PlayBGM(string name)
+        {
+            if (currentBGM == name) return;
+
+            StopBGM();
+
+            currentBGM = name;
+
+            PlayLooping(name);
+        }
+
+        public static void StopBGM()
+        {
+            if (currentBGM == null) return;
+            Stop(currentBGM);
+            currentBGM = null;
+        }
+
         public static void SetBGM()
         {
             bgmMuted = !bgmMuted;
 
             foreach (var s in sounds.Values)
             {
-                if (s.URL.ToLower().Contains(@"\bgm\") ||
-                    s.URL.ToLower().Contains(@"\menu\"))
+                if (IsBGM(s.URL))
                 {
                     s.settings.volume = bgmMuted ? 0 : bgmVolume;
                 }
             }
         }
+
         public static void SetSFX()
         {
             sfxMuted = !sfxMuted;
 
             foreach (var s in sounds.Values)
             {
-                if (s.URL.ToLower().Contains(@"\sfx\"))
+                if (!IsBGM(s.URL))
                 {
                     s.settings.volume = sfxMuted ? 0 : sfxVolume;
                 }
@@ -113,25 +148,6 @@ namespace UI
         {
             foreach (var s in sounds.Values)
                 s.controls.stop();
-        }
-
-        public static string currentBGM;
-
-        public static void PlayBGM(string name)
-        {
-            if (currentBGM == name) return;
-            StopBGM();
-            currentBGM = name;
-
-            if (bgmMuted) return; 
-
-            PlayLooping(name);
-        }
-        public static void StopBGM()
-        {
-            if (currentBGM == null) return;
-            Stop(currentBGM);
-            currentBGM = null;
         }
     }
 }

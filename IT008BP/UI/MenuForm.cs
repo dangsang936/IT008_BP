@@ -14,6 +14,7 @@ namespace UI
             InitializeComponent();
             this.Activated += (s, e) =>
             {
+                AudioManager.Stop("BGM");
                 AudioManager.PlayBGM("menu");
             };
 
@@ -153,7 +154,6 @@ namespace UI
                 maingame game = new maingame();
                 game.FormClosed += (s2, e2) =>
                 {
-                    AudioManager.Play("create");
                     this.Opacity = 0;
                     this.Show();
                     Timer fadeInTimer = new Timer();
