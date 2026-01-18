@@ -96,12 +96,14 @@ namespace UI
 
             this.Activated += (s, e) =>
             {
+                
                 AudioManager.PlayBGM("BGM");
             };
             this.FormClosed += (s, e) =>
             {
-                AudioManager.StopBGM();
+                AudioManager.currentBGM = null;
             };
+
         }
         private void InitBuffer()
         {
