@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DATA;
 
 namespace LOGIC
 {
     public class Score
     {
         public int ScoreValue;
-        public int ComboCount;
+        public static int ComboCount;
         public int HighScore;
 
         private int NoClearTurns;

@@ -63,10 +63,6 @@ namespace UI
         private List<List<Point>> waveLayers = new List<List<Point>>();
         private bool isWaveClearing = false;
 
-        bool bgmOn = true;
-        bool sfxOn = true;
-
-
         public maingame()
         {
             InitializeComponent();
@@ -84,22 +80,14 @@ namespace UI
             waveTimer.Interval = 40; 
             waveTimer.Tick += WaveTick;
 
-            try
+            this.Activated += (s, e) =>
             {
                 AudioManager.PlayBGM("BGM");
-
-            }
-            catch { }
-
+            };
             this.FormClosed += (s, e) =>
             {
-                try
-                {
-                    AudioManager.Stop("BGM");
-                }
-                catch { }
+                AudioManager.StopBGM();
             };
-
         }
         private void InitBuffer()
         {
@@ -196,7 +184,7 @@ namespace UI
                 Location = new Point(board.Right + 170, scorePanel.Bottom + 300),
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Cursor = Cursors.Hand,
-                Image = AudioManager.IsBGMMuted()
+                Image = AudioManager.bgmMuted
                     ? Properties.Resources.music_off
                     : Properties.Resources.music_on
             };
@@ -207,7 +195,7 @@ namespace UI
                 Location = new Point(board.Right + 270, scorePanel.Bottom + 300),
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Cursor = Cursors.Hand,
-                Image = AudioManager.IsSFXMuted()
+                Image = AudioManager.sfxMuted
                     ? Properties.Resources.mute
                     : Properties.Resources.unmute
             };
@@ -215,21 +203,18 @@ namespace UI
             this.Controls.Add(btnBGM);
             this.Controls.Add(btnSFX);
 
-            bool bgmOn = true;
-            bool sfxOn = true;
-
             btnBGM.Click += (s, e) =>
             {
-                AudioManager.ToggleBGM();
-                btnBGM.Image = AudioManager.IsBGMMuted()
+                AudioManager.SetBGM();
+                btnBGM.Image = AudioManager.bgmMuted
                     ? Properties.Resources.music_off
                     : Properties.Resources.music_on;
             };
 
             btnSFX.Click += (s, e) =>
             {
-                AudioManager.ToggleSFX();
-                btnSFX.Image = AudioManager.IsSFXMuted()
+                AudioManager.SetSFX();
+                btnSFX.Image = AudioManager.sfxMuted
                     ? Properties.Resources.mute
                     : Properties.Resources.unmute;
             };
@@ -243,7 +228,8 @@ namespace UI
             waveLayers.Clear();
             waveIndex = 0;
             isWaveClearing = true;
-            AudioManager.Play("score");
+            string combo = $"Combo{Score.ComboCount}";
+            AudioManager.Play(combo);
             foreach (int r in gameLogic.CheckRowsFull())
             {
                 for (int x = 0; x < cols; x++)

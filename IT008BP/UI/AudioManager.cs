@@ -13,15 +13,14 @@ namespace UI
         private static int bgmVolume = 30;
         private static int sfxVolume = 70;
 
-        private static bool bgmMuted = false;
-        private static bool sfxMuted = false;
+        public static bool bgmMuted = false;
+        public static bool sfxMuted = false;
 
         public static void LoadSounds()
         {
             LoadFolder(@"Sounds\MENU");
             LoadFolder(@"Sounds\BGM");
             LoadFolder(@"Sounds\SFX");
-            LoadFolder(@"Sounds\AllClear");
             LoadFolder(@"Sounds\GameOver");
         }
 
@@ -76,8 +75,7 @@ namespace UI
             s.controls.stop();
             s.controls.play();
         }
-
-        public static void ToggleBGM()
+        public static void SetBGM()
         {
             bgmMuted = !bgmMuted;
 
@@ -90,8 +88,7 @@ namespace UI
                 }
             }
         }
-
-        public static void ToggleSFX()
+        public static void SetSFX()
         {
             sfxMuted = !sfxMuted;
 
@@ -103,9 +100,6 @@ namespace UI
                 }
             }
         }
-
-        public static bool IsBGMMuted() => bgmMuted;
-        public static bool IsSFXMuted() => sfxMuted;
 
         public static void Stop(string name)
         {
@@ -125,10 +119,18 @@ namespace UI
         public static void PlayBGM(string name)
         {
             if (currentBGM == name) return;
-
-            StopAll();
-            PlayLooping(name);
+            StopBGM();
             currentBGM = name;
+
+            if (bgmMuted) return; 
+
+            PlayLooping(name);
+        }
+        public static void StopBGM()
+        {
+            if (currentBGM == null) return;
+            Stop(currentBGM);
+            currentBGM = null;
         }
     }
 }

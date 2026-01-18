@@ -12,21 +12,9 @@ namespace UI
         public MenuForm()
         {
             InitializeComponent();
-
-            try
+            this.Activated += (s, e) =>
             {
                 AudioManager.PlayBGM("menu");
-
-            }
-            catch { }
-
-            this.FormClosed += (s, e) =>
-            {
-                try
-                {
-                    AudioManager.Stop("menu");
-                }
-                catch { }
             };
 
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -122,7 +110,7 @@ namespace UI
         private void BtnPlay_Click(object sender, EventArgs e)
         {
             
-            AudioManager.Play("button_click");
+            AudioManager.Play("click");
             fadeOutTimer = new Timer();
             fadeOutTimer.Interval = 20;
             fadeOutTimer.Tick += FadeOutTimer_Tick;
@@ -133,7 +121,7 @@ namespace UI
         private void BtnExit_Click(object sender, EventArgs e)
         {
             
-            AudioManager.Play("button_click");
+            AudioManager.Play("click");
             fadeExitTimer = new Timer();
             fadeExitTimer.Interval = 20;
             fadeExitTimer.Tick += FadeExitTimer_Tick;
@@ -165,18 +153,9 @@ namespace UI
                 maingame game = new maingame();
                 game.FormClosed += (s2, e2) =>
                 {
-                    AudioManager.Play("button_click");
+                    AudioManager.Play("click");
                     this.Opacity = 0;
                     this.Show();
-                    try
-                    {
-                        AudioManager.PlayLooping("menu");
-                    }
-                    catch
-                    {
-
-                    }
-
                     Timer fadeInTimer = new Timer();
                     fadeInTimer.Interval = 20;
                     fadeInTimer.Tick += (s3, e3) =>
