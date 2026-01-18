@@ -26,7 +26,7 @@ namespace LOGIC
 
         public int CalculatePoints(int blockSize, int linesCleared)
         {
-            int pointsFromBlocks = blockSize;
+            int pointsFromBlocks = blockSize;   
             int pointsFromLines = 36 * linesCleared;
 
             int totalPoints = (pointsFromBlocks + pointsFromLines) * ComboCount;

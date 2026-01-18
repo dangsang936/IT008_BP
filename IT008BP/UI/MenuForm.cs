@@ -110,7 +110,7 @@ namespace UI
         private void BtnPlay_Click(object sender, EventArgs e)
         {
             
-            AudioManager.Play("click");
+            AudioManager.Play("create");
             fadeOutTimer = new Timer();
             fadeOutTimer.Interval = 20;
             fadeOutTimer.Tick += FadeOutTimer_Tick;
@@ -121,7 +121,7 @@ namespace UI
         private void BtnExit_Click(object sender, EventArgs e)
         {
             
-            AudioManager.Play("click");
+            AudioManager.Play("create");
             fadeExitTimer = new Timer();
             fadeExitTimer.Interval = 20;
             fadeExitTimer.Tick += FadeExitTimer_Tick;
@@ -153,7 +153,7 @@ namespace UI
                 maingame game = new maingame();
                 game.FormClosed += (s2, e2) =>
                 {
-                    AudioManager.Play("click");
+                    AudioManager.Play("create");
                     this.Opacity = 0;
                     this.Show();
                     Timer fadeInTimer = new Timer();

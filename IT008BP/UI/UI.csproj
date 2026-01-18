@@ -199,6 +199,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SOUNDS\SFX\wrong.m4a">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\music_off.png" />
     <None Include="Resources\music_on.png" />
     <None Include="Resources\mute.png" />
@@ -206,7 +209,6 @@
     <Content Include="SOUNDS\SFX\allclear.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SOUNDS\SFX\wrong.mp3" />
     <Resource Include="Assets\Big O.png" />
     <Resource Include="Assets\Blue.png" />
     <Resource Include="Assets\Green.png" />

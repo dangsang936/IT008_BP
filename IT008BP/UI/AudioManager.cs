@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using WMPLib;
 
 namespace UI
@@ -29,7 +30,7 @@ namespace UI
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
             if (!Directory.Exists(path)) return;
 
-            foreach (var file in Directory.GetFiles(path, "*.mp3"))
+            foreach (var file in Directory.GetFiles(path).Where(f => f.EndsWith(".mp3") || f.EndsWith(".m4a")))
             {
                 string name = Path.GetFileNameWithoutExtension(file).ToLower();
                 if (sounds.ContainsKey(name)) continue;

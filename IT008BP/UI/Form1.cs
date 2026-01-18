@@ -29,6 +29,7 @@ namespace UI
         private PictureBox preview1, preview2, preview3;
         private Label scorePanel;
         private Label highScorePanel;
+        private Label ComboPanel;
         private int currScore = 0;
         private int highScore = 0;
         private DATA.DataHelper dataHelper;
@@ -63,6 +64,10 @@ namespace UI
         private List<List<Point>> waveLayers = new List<List<Point>>();
         private bool isWaveClearing = false;
 
+        private int ComboCount = 0;
+        private Timer comboTimer;
+        private int hasPlaced = 0;
+
         public maingame()
         {
             InitializeComponent();
@@ -79,6 +84,15 @@ namespace UI
             waveTimer = new Timer();
             waveTimer.Interval = 40; 
             waveTimer.Tick += WaveTick;
+
+            comboTimer = new Timer();
+            comboTimer.Interval = 3000;
+            comboTimer.Tick += (s, e) =>
+            {
+                ComboPanel.Visible = false;
+                comboTimer.Stop();
+            };
+
 
             this.Activated += (s, e) =>
             {
@@ -148,7 +162,16 @@ namespace UI
                 Text = $"Highest Score: {highScore}"
             };
             this.Controls.Add(highScorePanel);
-
+            ComboPanel = new Label
+            {
+                Font = new Font("Segoe UI", 20, FontStyle.Bold),
+                Location = new Point(board.Right + 120, board.Top + 200),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Padding = new Padding(0),
+                Visible = false
+            };
+            this.Controls.Add(ComboPanel);
             //===Previews===
             blockPanel = new FlowLayoutPanel
             {
@@ -228,7 +251,9 @@ namespace UI
             waveLayers.Clear();
             waveIndex = 0;
             isWaveClearing = true;
-            string combo = $"Combo{Score.ComboCount}";
+            string combo = $"Combo{ComboCount}";
+            if (ComboCount > 8)
+                combo = "combo8";
             AudioManager.Play(combo);
             foreach (int r in gameLogic.CheckRowsFull())
             {
@@ -299,6 +324,7 @@ namespace UI
 
         private void board_MouseClick(object sender, MouseEventArgs e)
         {
+            AudioManager.Play("click");
             if (e.Button == MouseButtons.Left)
             {
                 if (draggingBlock == null) return;
@@ -313,8 +339,8 @@ namespace UI
                 {
                     //===PLACE===
                     gameLogic.Place(draggingBlock);
-                    UpdateScore(10);
-
+                    UpdateScore(5);
+                    
                     //===CLEAR ROW/COL===
                     int rowsCleared = gameLogic.CheckRowsFull().Count;
                     int colsCleared = gameLogic.CheckColumnsFull().Count;
@@ -323,16 +349,28 @@ namespace UI
                     {
                         if (rowsCleared > 0 || colsCleared > 0)
                         {
-                            UpdateScore((rowsCleared + colsCleared) * 20);
+                            UpdateScore((rowsCleared + colsCleared) * 36);
+                            ComboCount++;
+                            hasPlaced = 0;
+                            ComboChanged();
                             StartWaveClear();
                         }
-
-
                         int totalClear = rowsCleared + colsCleared;
-                        UpdateScore(totalClear * 20);
+                        UpdateScore(totalClear * 18);
+                    }
+                    else
+                    {
+                            hasPlaced++;
+                            if (hasPlaced > 9 && ComboCount != 0)
+                            {
+                                ComboCount = 0;
+                                ComboPanel.Visible = false;
+                                comboTimer.Stop();
+                                hasPlaced = 0;
+                            }
                     }
 
-                    draggingBlock = null;
+                        draggingBlock = null;
                     draggingBlockSourceIndex = -1; 
                     highlightCells.Clear();
                     board.Invalidate();
@@ -355,8 +393,7 @@ namespace UI
                 }
                 else
                 {
-                    // không đặt được => âm thanh hoặc feedback
-                    System.Media.SystemSounds.Beep.Play();
+                    AudioManager.Play("wrong");
                 }
             }
             else if (e.Button == MouseButtons.Right)
@@ -387,7 +424,6 @@ namespace UI
             }
             if (!allEmpty)
                 return;
-            AudioManager.Play("create"); 
             for (int i = 0; i < 3; i++)
             {
 
@@ -397,7 +433,7 @@ namespace UI
         }
         private void HandleAllClear()
         {
-            UpdateScore(100);
+            UpdateScore(300);
             AudioManager.Play("AllClear");
             FlashBoard();
         }
@@ -688,14 +724,24 @@ namespace UI
 
             return true;
         }
+        private void ComboChanged()
+        {
+            ComboPanel.Text = $"Combo: x{ComboCount}";
+            ComboPanel.Visible = true;
 
+            comboTimer.Stop();
+            comboTimer.Start();
+        }
+       
         private void PreviewMouseDown(object sender, MouseEventArgs e)
         {
+            AudioManager.Play("pickup");
             PictureBox box = sender as PictureBox;
             int idx = blockPanel.Controls.IndexOf(box);
             if (idx < 0 || idx > 2) return;
             if (previewBlocks[idx] == null || draggingBlock != null) return;
 
+            
             if (e.Button == MouseButtons.Left)
             {
                 draggingBlockSourceIndex = idx;
