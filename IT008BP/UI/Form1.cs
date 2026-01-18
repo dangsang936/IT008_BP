@@ -76,13 +76,13 @@ namespace UI
             gameLogic = new MainBoard();
             blockData = new BlockData("J");
             block = new Block();
+            dataHelper = new DATA.DataHelper("gameScore.db");
+            highScore = dataHelper.GetHighscore();
             SetupUI();
 
             waveTimer = new Timer();
             waveTimer.Interval = 40; 
             waveTimer.Tick += WaveTick;
-            dataHelper = new DATA.DataHelper("gameScore.db");
-            highScore = dataHelper.GetHighscore();
 
 
 
