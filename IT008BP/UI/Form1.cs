@@ -28,6 +28,7 @@ namespace UI
         private FlowLayoutPanel blockPanel;
         private PictureBox preview1, preview2, preview3;
         private Label scorePanel;
+        private Label highScorePanel;
         private int currScore = 0;
         private int highScore = 0;
         private DATA.DataHelper dataHelper;
@@ -147,6 +148,17 @@ namespace UI
                 Text = "Score: 0"
             };
             this.Controls.Add(scorePanel);
+
+            highScorePanel = new Label
+            {
+                Font = new Font("Segoe UI", 25, FontStyle.Bold),
+                Location = new Point(board.Left,board.Bottom),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Padding = new Padding(0),
+                Text = $"Highest Score: {highScore}"
+            };
+            this.Controls.Add(highScorePanel);
 
             //===Previews===
             blockPanel = new FlowLayoutPanel
