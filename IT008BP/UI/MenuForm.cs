@@ -41,13 +41,13 @@ namespace UI
             btnPlay.Click += BtnPlay_Click;
             this.Controls.Add(btnPlay);
 
-            PictureBox btnSetting = new PictureBox();
+            /*PictureBox btnSetting = new PictureBox();
             btnSetting.Image = Properties.Resources.setting;
             btnSetting.SizeMode = PictureBoxSizeMode.Zoom;
             btnSetting.Cursor = Cursors.Hand;
             btnSetting.Size = new Size(320, 128); 
             btnSetting.BackColor = Color.Transparent;
-            this.Controls.Add(btnSetting);
+            this.Controls.Add(btnSetting);*/
 
             PictureBox btnExit = new PictureBox();
             btnExit.Image = Properties.Resources.quit;
@@ -57,38 +57,61 @@ namespace UI
             btnExit.BackColor = Color.Transparent;
             btnExit.Click += BtnExit_Click;
             this.Controls.Add(btnExit);
+            int Clamp(int value, int min, int max)
+            {
+                if (value < min) return min;
+                if (value > max) return max;
+                return value;
+            }
 
             Action positionControls = () =>
             {
-                
-                int logoWidth = (int)(this.ClientSize.Width * 0.6);
-                logoWidth = Math.Max(240, Math.Min(logoWidth, 720));
+                int formW = this.ClientSize.Width;
+                int formH = this.ClientSize.Height;
+
+                /* ===== LOGO (RẤT TO) ===== */
+                int logoWidth = (int)(formW * 0.82);
+                logoWidth = Clamp(logoWidth, 480, 860);
                 int logoHeight = logoWidth / 3;
+
                 logo.Size = new Size(logoWidth, logoHeight);
 
-                int btnWidth = (int)(this.ClientSize.Width * 0.4); 
-                btnWidth = Math.Max(240, Math.Min(btnWidth, 420)); 
-                int btnHeight = (int)(btnWidth * 0.4); 
+                /* ===== BUTTONS (PLAY = QUIT) ===== */
+                int btnWidth = (int)(formW * 0.45);
+                btnWidth = Clamp(btnWidth, 300, 480);
+                int btnHeight = (int)(btnWidth * 0.38);
+
                 btnPlay.Size = new Size(btnWidth, btnHeight);
-                btnSetting.Size = new Size(btnWidth, btnHeight);
                 btnExit.Size = new Size(btnWidth, btnHeight);
 
-                int centerXButtons = (this.ClientSize.Width - btnWidth) / 2;
+                int spaceLogoBtn = 35;
+                int spaceBtn = 20;
 
+                int totalHeight =
+                    logoHeight +
+                    spaceLogoBtn +
+                    btnHeight +
+                    spaceBtn +
+                    btnHeight;
 
-                int spacing = Math.Max(6, btnHeight / 12);
-                int totalButtonsHeight = 3 * btnHeight + 2 * spacing;
-                int minTopBelowLogo = logo.Bounds.Bottom + 20;
-                int startY = Math.Max(minTopBelowLogo, (this.ClientSize.Height - totalButtonsHeight) / 2);
+                int startY = (formH - totalHeight) / 2;
 
-                btnPlay.Location = new Point(centerXButtons, startY);
-                btnSetting.Location = new Point(centerXButtons, startY + btnHeight + spacing);
-                btnExit.Location = new Point(centerXButtons, startY + 2 * (btnHeight + spacing));
+                logo.Location = new Point(
+                    (formW - logoWidth) / 2,
+                    startY
+                );
 
-                int centerXLogo = (this.ClientSize.Width - logo.Width) / 2;
-                int logoY = Math.Max(20, startY - logo.Height - 20);
-                logo.Location = new Point(centerXLogo, logoY);
+                btnPlay.Location = new Point(
+                    (formW - btnWidth) / 2,
+                    logo.Bottom + spaceLogoBtn
+                );
+
+                btnExit.Location = new Point(
+                    (formW - btnWidth) / 2,
+                    btnPlay.Bottom + spaceBtn
+                );
             };
+
 
             this.Load += (s, e) => positionControls();
             this.Resize += (s, e) => positionControls();
