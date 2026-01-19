@@ -3,6 +3,7 @@ using LOGIC;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace UI
@@ -317,7 +318,13 @@ namespace UI
         public void GeneratePreviewBlocks()
         {
             for (int i = 0; i < 3; i++)
-                previewBlocks[i] = storage.GetRandomBlock(); 
+            {
+                if (storage.check_Bag_Empty() == true)
+                    storage.Add_To_Bag();
+                previewBlocks[i] = storage.Bag.First();
+                storage.Bag.Dequeue();
+                blockPanel.Controls[i].Invalidate();
+            }
 
             preview1.Invalidate();
             preview2.Invalidate();
@@ -428,8 +435,10 @@ namespace UI
                 return;
             for (int i = 0; i < 3; i++)
             {
-
-                previewBlocks[i] = storage.GetRandomBlock(); 
+                if (storage.check_Bag_Empty() == true)
+                    storage.Add_To_Bag();
+                previewBlocks[i] = storage.Bag.First();
+                storage.Bag.Dequeue();
                 blockPanel.Controls[i].Invalidate();
             }
         }

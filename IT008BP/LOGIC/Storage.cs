@@ -105,5 +105,9 @@ namespace LOGIC
                 Bag.Enqueue(GetRandomBlock());
             }
         }
+        public bool check_Bag_Empty()
+        {
+            return Bag.Count == 0;
+        }
     }
 }
