@@ -94,7 +94,7 @@ namespace UI
             };
 
 
-            this.Activated += (s, e) =>
+            this.Shown += (s, e) =>
             {
                 
                 AudioManager.PlayBGM("BGM");
