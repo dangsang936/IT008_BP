@@ -142,6 +142,9 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="gameoverOverlay.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MenuForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -152,6 +155,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="gameoverOverlay.resx">
+      <DependentUpon>gameoverOverlay.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MenuForm.resx">
       <DependentUpon>MenuForm.cs</DependentUpon>
@@ -199,6 +205,16 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\button\menu.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\button\retry.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\button\setting.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Content Include="Assets\gameover.png" />
     <Content Include="SOUNDS\SFX\wrong.m4a">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -231,7 +247,9 @@
     <Resource Include="Assets\button\play.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Content Include="Assets\button\quit.png" />
+    <Resource Include="Assets\button\quit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Content Include="SOUNDS\BGM\BGM.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

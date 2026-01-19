@@ -58,6 +58,7 @@ namespace UI
             btnExit.BackColor = Color.Transparent;
             btnExit.Click += BtnExit_Click;
             this.Controls.Add(btnExit);
+
             int Clamp(int value, int min, int max)
             {
                 if (value < min) return min;
@@ -70,14 +71,12 @@ namespace UI
                 int formW = this.ClientSize.Width;
                 int formH = this.ClientSize.Height;
 
-                /* ===== LOGO (RẤT TO) ===== */
                 int logoWidth = (int)(formW * 0.82);
                 logoWidth = Clamp(logoWidth, 480, 860);
                 int logoHeight = logoWidth / 3;
 
                 logo.Size = new Size(logoWidth, logoHeight);
 
-                /* ===== BUTTONS (PLAY = QUIT) ===== */
                 int btnWidth = (int)(formW * 0.45);
                 btnWidth = Clamp(btnWidth, 300, 480);
                 int btnHeight = (int)(btnWidth * 0.38);
@@ -130,7 +129,7 @@ namespace UI
             fadeIn.Start();
 
         }
-
+        
         private void BtnPlay_Click(object sender, EventArgs e)
         {
             

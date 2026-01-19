@@ -73,7 +73,6 @@ namespace UI
             InitializeComponent();
             
             UpdateStyles();
-
             gameLogic = new MainBoard();
             blockData = new BlockData("J");
             block = new Block();
@@ -302,11 +301,10 @@ namespace UI
                 {
                     waveTimer.Stop();
                     waveTimer.Dispose();
-                    MessageBox.Show($"Điểm số cuối cùng: {currScore}","GAME OVER",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                    HandleGameOver();
                     if (currScore > highScore)
                         dataHelper.UpdateHighscore(currScore);
 
-                    this.Close();
                 }
                 return;
             }
@@ -372,7 +370,7 @@ namespace UI
                             }
                     }
 
-                        draggingBlock = null;
+                    draggingBlock = null;
                     draggingBlockSourceIndex = -1; 
                     highlightCells.Clear();
                     board.Invalidate();
@@ -384,13 +382,12 @@ namespace UI
                         waveTimer.Stop();
                         waveTimer.Dispose();
 
-                        MessageBox.Show($"Điểm số cuối cùng: {currScore}", "GAME OVER", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        HandleGameOver();   
                         if (currScore > highScore)
                             dataHelper.UpdateHighscore(currScore);
                         
                         AudioManager.Play("gameover");
 
-                        this.Close();
                     }
                 }
                 else
@@ -433,6 +430,35 @@ namespace UI
                 blockPanel.Controls[i].Invalidate();
             }
         }
+        private void RestartGame()
+        {
+            maingame game = new maingame();
+            this.Close();
+            game.Show();
+        }
+        void HandleGameOver()
+        {
+            gameoverOverlay overlay = new gameoverOverlay(currScore, highScore);
+
+            overlay.RetryClicked += () =>
+            {
+                board.Controls.Remove(overlay);
+                overlay.Dispose();
+                RestartGame();
+            };
+
+            overlay.MenuClicked += () =>
+            {
+                board.Controls.Remove(overlay);
+                overlay.Dispose();
+                this.Close();
+            };
+
+            board.Controls.Add(overlay);   
+            overlay.BringToFront();
+        }
+
+
         private void HandleAllClear()
         {
             UpdateScore(300);
