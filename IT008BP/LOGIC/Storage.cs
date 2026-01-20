@@ -27,12 +27,12 @@ namespace LOGIC
 
         public Queue<BlockData> Bag { get; set; }
 
-        // KHAI BÁO đối tượng Random MỘT LẦN duy nhất
+        // khai báo đối tượng Random
         private Random rand;
 
         public Storage()
         {
-            // KHỞI TẠO đối tượng Random MỘT LẦN duy nhất
+            // khởi tạo đối tượng Random
             rand = new Random();
 
             Bag = new Queue<BlockData>();
@@ -52,57 +52,63 @@ namespace LOGIC
             //Khởi tạo tỉ lệ xuất hiện cho từng loại khối
             Rate = new Dictionary<string, int>();
             // --- NHÓM 1: CỨU HỘ & DỄ  ---
-            Rate.Add("dot", 8); // 1x1: Cần thiết nhất để sửa sai
-            Rate.Add("I2", 8); // 1x2: Rất dễ đặt
-            Rate.Add("O", 8); // 2x2: Dễ tạo cụm vuông
+            Rate.Add("dot", 2); // 1x1: Cần thiết nhất để sửa sai
+            Rate.Add("I2", 2); // 1x2: Rất dễ đặt
+            Rate.Add("O", 2); // 2x2: Dễ tạo cụm vuông
 
             // --- NHÓM 2: PHỔ THÔNG ---
-            Rate.Add("I3", 9); // 1x3: Dùng dọn hàng tốt
-            Rate.Add("T", 9); // Chữ T
-            Rate.Add("L", 9); // Chữ L
-            Rate.Add("J", 9); // Chữ J
+            Rate.Add("I3", 3); // 1x3: Dùng dọn hàng tốt
+            Rate.Add("T", 3); // Chữ T
+            Rate.Add("L", 3); // Chữ L
+            Rate.Add("J", 3); // Chữ J
 
             // --- NHÓM 3: KHÓ CHỊU  ---
-            Rate.Add("S", 7); // Zic-zac khó chịu
-            Rate.Add("Z", 7); // Zic-zac ngược
-            Rate.Add("I4", 6); // Thanh dài 4 ô 
+            Rate.Add("S", 2); // Zic-zac khó chịu
+            Rate.Add("Z", 3); // Zic-zac ngược
+            Rate.Add("I4", 3); // Thanh dài 4 ô 
 
             // --- NHÓM 4: KHỐI KHỔNG LỒ  ---
-            Rate.Add("L3", 5); // Chữ L to (3x3)
-            Rate.Add("J3", 5); // Chữ J to (3x3)
-            Rate.Add("I5", 5); // Thanh dài 5 
-            Rate.Add("O3", 5); // Khối vuông 3x3
+            Rate.Add("L3", 1); // Chữ L to (3x3)
+            Rate.Add("J3", 1); // Chữ J to (3x3)
+            Rate.Add("I5", 1); // Thanh dài 5 
+            Rate.Add("O3", 1); // Khối vuông 3x3
         }
 
-        public BlockData GetRandomBlock()
+        public void Add_To_Bag()
         {
-            string name = "dot";
-            // SỬ DỤNG đối tượng 'rand' đã được khởi tạo MỘT LẦN
-            int cur_rate = 1;
-            int random_num = rand.Next(100) + 1; // khởi tạo 1 số random từ 1 -> 100
-            foreach (var tmp in Rate)
+            //Tạo một danh sách tạm thời (cái túi)
+            List<string> temp_bag = new List<string>();
+
+            //Đổ khối vào túi dựa trên tỉ lệ đã định nghĩa
+            foreach (var item in Rate)
             {
-                cur_rate += tmp.Value;
-                if (cur_rate > random_num)
+                int count = item.Value;
+                for (int i = 0; i < count; i++)
                 {
-                    name = tmp.Key; // lấy tên của nhóm block
-                    break;
+                    temp_bag.Add(item.Key);
                 }
             }
 
-            // khởi tạo 1 góc độ quay ngẫu nhiên 0 --> 3 tương đương với 0 -> 270 độ
-            int random_rotation = rand.Next(4);
-            int rot = Rotation_Array[random_rotation];
-
-            return Shapes[(name, rot)];
-        }
-
-        //hàm thêm 15 khối vào bag
-        public void Add_To_Bag()
-        {
-            for (int i = 0; i < 15; i++)
+            //Tráo đổi thứ tự túi bằng thuật toán Fisher-Yates
+            int n = temp_bag.Count;
+            while (n > 1)
             {
-                Bag.Enqueue(GetRandomBlock());
+                n--;
+                int k = rand.Next(n + 1);
+                string value = temp_bag[k];
+                temp_bag[k] = temp_bag[n];
+                temp_bag[n] = value;
+            }
+
+            //Đưa các khối từ túi đã tráo vào hàng đợi Bag của game
+            foreach (string name in temp_bag)
+            {
+                int random_rotation = rand.Next(4);
+                int rot = Rotation_Array[random_rotation];
+                if (Shapes.ContainsKey((name, rot)))
+                {
+                    Bag.Enqueue(Shapes[(name, rot)]);
+                }
             }
         }
         public bool check_Bag_Empty()
