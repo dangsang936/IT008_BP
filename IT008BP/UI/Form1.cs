@@ -67,6 +67,9 @@ namespace UI
 
         private int ComboCount = 0;
         private Timer comboTimer;
+        private Timer scoreTimer;
+        private int displayScore = 0;
+        private int targetScore = 0;
         private int hasPlaced = 0;
 
         public maingame()
@@ -363,7 +366,7 @@ namespace UI
                             StartWaveClear();
                         }
                         int totalClear = rowsCleared + colsCleared;
-                        UpdateScore(totalClear * 18);
+                        UpdateScore(totalClear * 18 * ComboCount);
                     }
                     else
                     {
@@ -514,14 +517,40 @@ namespace UI
             return true;
         }
 
-
         public void UpdateScore(int points)
         {
-            currScore += points;
-            scorePanel.Text = $"Score: {currScore}";
-            
+            currScore += points;        
+            ChangeScore(currScore);     
         }
 
+        public void ChangeScore(int currScore)
+        {
+            targetScore = currScore;
+
+            if (scoreTimer == null)
+            {
+                scoreTimer = new Timer();
+                scoreTimer.Interval = 50;
+                scoreTimer.Tick += ScoreTimer_Tick;
+            }
+
+            scoreTimer.Start();
+        }
+
+        private void ScoreTimer_Tick(object sender, EventArgs e)
+        {
+            if (displayScore < targetScore)
+            {
+                displayScore += Math.Max(1, (targetScore - displayScore) / 10);
+                scorePanel.Text = $"Score: {displayScore}";
+            }
+            else
+            {
+                displayScore = targetScore;
+                scorePanel.Text = $"Score: {displayScore}";
+                scoreTimer.Stop();
+            }
+        }
         private PictureBox CreatePreviewBox()
         {
             var preview = new PictureBox
@@ -763,7 +792,7 @@ namespace UI
         }
         private void ComboChanged()
         {
-            ComboPanel.Text = $"Combo: x{ComboCount}";
+            ComboPanel.Text = $"Combo x{ComboCount}";
             ComboPanel.Visible = true;
 
             comboTimer.Stop();
