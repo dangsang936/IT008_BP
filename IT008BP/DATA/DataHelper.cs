@@ -9,21 +9,22 @@ namespace DATA
         private readonly string dbFile;
         private readonly string connectionString;
 
-         public DataHelper(string fileName = "gamescore.db")
-        {
-            string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string appFolder = Path.Combine(baseDir, "BlockPuzzle");
+        //khởi tạo cơ sở dữ liệu SQLite, tạo thư mục lưu trữ an toàn và tự động tạo database khi chạy game lần đầu.
+        public DataHelper(string fileName = "gamescore.db")
+            {
+                string baseDir = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                string appFolder = Path.Combine(baseDir, "BlockPuzzle");
 
-            if (!Directory.Exists(appFolder))
-                Directory.CreateDirectory(appFolder);
+                if (!Directory.Exists(appFolder))
+                    Directory.CreateDirectory(appFolder);
 
-            dbFile = Path.Combine(appFolder, fileName);
-            connectionString = $"Data Source={dbFile};Version=3;";
+                dbFile = Path.Combine(appFolder, fileName);
+                connectionString = $"Data Source={dbFile};Version=3;";
 
-            if (!File.Exists(dbFile))
-                CreateDatabase();
-        }
-
+                if (!File.Exists(dbFile))
+                    CreateDatabase();
+            }
+        //tạo cơ sở dữ liệu
         private void CreateDatabase()
         {
             SQLiteConnection.CreateFile(dbFile);
@@ -48,7 +49,7 @@ namespace DATA
                 }
             }
         }
-
+        //trả về điểm cao nhất
         public int GetHighscore()
         {
             using (var conn = new SQLiteConnection(connectionString))
@@ -63,7 +64,7 @@ namespace DATA
                 }
             }
         }
-
+        //cập nhật điểm cao nhất
         public void UpdateHighscore(int score)
         {
             using (var conn = new SQLiteConnection(connectionString))

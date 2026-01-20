@@ -17,6 +17,7 @@ namespace UI
         public static bool sfxMuted = false;
         public static string currentBGM;
 
+        // tải tất cả âm thanh từ các thư mục con trong thư mục Sounds
         public static void LoadSounds()
         {
             LoadFolder(@"Sounds\MENU");
@@ -25,6 +26,7 @@ namespace UI
             LoadFolder(@"Sounds\GameOver");
         }
 
+        // tải âm thanh từ một thư mục cụ thể
         private static void LoadFolder(string relativePath)
         {
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
@@ -48,12 +50,14 @@ namespace UI
             }
         }
 
+        // kiểm tra xem âm thanh có phải là nhạc nền hay không
         private static bool IsBGM(string pathOrUrl)
         {
             string lower = pathOrUrl.ToLower();
             return lower.Contains(@"\bgm\") || lower.Contains(@"\menu\");
         }
 
+        // phát âm thanh theo tên
         public static void Play(string name)
         {
             name = name.ToLower();
@@ -69,6 +73,7 @@ namespace UI
             s.controls.play();
         }
 
+        // phát âm thanh lặp lại theo tên
         public static void PlayLooping(string name)
         {
             name = name.ToLower();
@@ -93,6 +98,7 @@ namespace UI
             }
         }
 
+        // phát nhạc nền theo tên
         public static void PlayBGM(string name)
         {
             if (currentBGM == name) return;
@@ -104,6 +110,7 @@ namespace UI
             PlayLooping(name);
         }
 
+        // dừng nhạc nền hiện tại
         public static void StopBGM()
         {
             if (currentBGM == null) return;
@@ -111,6 +118,7 @@ namespace UI
             currentBGM = null;
         }
 
+        // chuyển đổi trạng thái tắt/mở nhạc nền
         public static void SetBGM()
         {
             bgmMuted = !bgmMuted;
@@ -124,6 +132,7 @@ namespace UI
             }
         }
 
+        // chuyển đổi trạng thái tắt/mở hiệu ứng âm thanh
         public static void SetSFX()
         {
             sfxMuted = !sfxMuted;
@@ -137,6 +146,7 @@ namespace UI
             }
         }
 
+        // dừng âm thanh theo tên
         public static void Stop(string name)
         {
             name = name.ToLower();
@@ -144,6 +154,7 @@ namespace UI
                 sounds[name].controls.stop();
         }
 
+        // dừng tất cả âm thanh
         public static void StopAll()
         {
             foreach (var s in sounds.Values)
