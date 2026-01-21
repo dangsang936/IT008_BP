@@ -225,25 +225,7 @@
     <Content Include="SOUNDS\SFX\allclear.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Assets\Big O.png" />
-    <Resource Include="Assets\Blue.png" />
-    <Resource Include="Assets\Green.png" />
-    <Resource Include="Assets\High O.png" />
-    <Resource Include="Assets\I.png" />
     <Resource Include="Assets\icon.ico" />
-    <Resource Include="Assets\J.png" />
-    <Resource Include="Assets\L.png" />
-    <Resource Include="Assets\LightBlue.png" />
-    <Resource Include="Assets\Long J.png" />
-    <Resource Include="Assets\Long L.png" />
-    <Resource Include="Assets\O.png" />
-    <Resource Include="Assets\Orange.png" />
-    <Resource Include="Assets\Purple.png" />
-    <Resource Include="Assets\Red.png" />
-    <Resource Include="Assets\S.png" />
-    <Resource Include="Assets\T.png" />
-    <Resource Include="Assets\Yellow.png" />
-    <Resource Include="Assets\Z.png" />
     <Resource Include="Assets\button\play.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
