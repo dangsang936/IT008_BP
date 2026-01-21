@@ -225,7 +225,6 @@
     <Content Include="SOUNDS\SFX\allclear.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Assets\icon.ico" />
     <Resource Include="Assets\button\play.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
