@@ -801,15 +801,25 @@ namespace UI
        
         private void PreviewMouseDown(object sender, MouseEventArgs e)
         {
-            AudioManager.Play("pickup");
+            
             PictureBox box = sender as PictureBox;
             int idx = blockPanel.Controls.IndexOf(box);
             if (idx < 0 || idx > 2) return;
-            if (previewBlocks[idx] == null || draggingBlock != null) return;
+            //if (previewBlocks[idx] == null || draggingBlock != null) return;
 
             
             if (e.Button == MouseButtons.Left)
             {
+                if (previewBlocks[idx] == null) return;
+                AudioManager.Play("pickup");
+                if (draggingBlock != null)
+                {
+                    if (draggingBlockSourceIndex == idx) return;
+                    previewBlocks[draggingBlockSourceIndex] = draggingBlock.data;
+                    blockPanel.Controls[draggingBlockSourceIndex].Invalidate();
+                    highlightCells.Clear();
+                    board.Invalidate();
+                }
                 draggingBlockSourceIndex = idx;
                 var dataCopy = CloneBlockData(previewBlocks[idx]);
 
