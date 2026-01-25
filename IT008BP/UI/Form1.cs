@@ -125,6 +125,10 @@ namespace UI
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = System.Drawing.Color.FromArgb(62, 87, 153);
             this.ClientSize = new Size(900, 600);
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.Text = "Block Puzzle";
+            this.WindowState = FormWindowState.Normal;
 
             //===Board===
             board = new BufferedPanel
